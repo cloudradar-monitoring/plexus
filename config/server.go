@@ -40,11 +40,11 @@ func NewServer(crt, key string) (*Server, error) {
 		return nil, fmt.Errorf("cannot read private key %s: %s", key, err)
 	}
 	keyBlock, _ := pem.Decode(keyBytes)
-	privKey, err := parsePrivateRsaKey(keyBlock.Bytes)
+	server.Key, err = parsePrivateRsaKey(keyBlock.Bytes)
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse private key %s: %s", key, err)
 	}
-	publicKeyAsn1Der := x509.MarshalPKCS1PublicKey(&privKey.PublicKey)
+	publicKeyAsn1Der := x509.MarshalPKCS1PublicKey(&server.Key.PublicKey)
 	publicKeyHash := sha512.Sum384(publicKeyAsn1Der)
 	server.ServerID = strings.ToUpper(hex.EncodeToString(publicKeyHash[:]))
 
