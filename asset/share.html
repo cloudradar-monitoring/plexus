@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Plexus {{.ID}}</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      html,
+      body,
+      #share,
+      #message-container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: black;
+        font-family: helvetica, verdana;
+        color: rgb(230, 230, 230);
+      }
+      #message-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      .spinner {
+        display: inline-block;
+        width: 80px;
+        height: 80px;
+      }
+      .spinner {
+        margin: 0 auto;
+        content: " ";
+        display: block;
+        width: 64px;
+        height: 64px;
+        margin: 8px;
+        border-radius: 50%;
+        border: 6px solid #fff;
+        border-color: #fff transparent #fff transparent;
+        animation: lds-dual-ring 1.2s linear infinite;
+      }
+      @keyframes lds-dual-ring {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    <script>
+      const loadIframe = (url) => {
+        const share = document.querySelector("#share");
+        const messageContainer = document.querySelector("#message-container");
+        share.setAttribute("src", url);
+        share.style.display = "block";
+        messageContainer.style.display = "none";
+      };
+
+      window.onload = () => {
+        const handle = setInterval(() => {
+          fetch("/check/{{.ID}}")
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.url) {
+                loadIframe(data.url);
+                clearInterval(handle);
+              }
+            });
+        }, 1000);
+      };
+    </script>
+  </head>
+  <body>
+    <div id="message-container">
+      <h1>Waiting for agent to connect</h1>
+      <span class="spinner" />
+    </div>
+    <iframe id="share" style="display: none;border: 0;" src="" />
+  </body>
+</html>
