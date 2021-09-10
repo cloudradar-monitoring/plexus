@@ -16,7 +16,7 @@ func New(h *handler.Handler) http.Handler {
 	r.Use(accessLog)
 	r.Post("/session", h.CreateSession)
 	r.Get("/session/{id}", h.ShareSession)
-	r.Get("/check/{id}", h.ShareSessionCheck)
+	r.Get("/session/{id}/url", h.ShareSessionURL)
 	r.Get("/config/{id}:{token}", h.GetAgentMsh)
 	r.Get("/agent/{id}:{token}", h.ProxyAgent)
 	r.Get("/meshrelay.ashx", h.ProxyRelay)

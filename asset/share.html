@@ -60,7 +60,7 @@
 
       window.onload = () => {
         const handle = setInterval(() => {
-          fetch("/check/{{.ID}}")
+          fetch("/session/{{.ID}}/url")
             .then((response) => response.json())
             .then((data) => {
               if (data.url) {

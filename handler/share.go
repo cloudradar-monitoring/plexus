@@ -37,7 +37,7 @@ func (h *Handler) ShareSession(rw http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *Handler) ShareSessionCheck(rw http.ResponseWriter, r *http.Request) {
+func (h *Handler) ShareSessionURL(rw http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
 	user, password, _ := r.BasicAuth()
