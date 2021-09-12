@@ -9,6 +9,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// ProxyRelay godoc
+// @Summary Forwards meshagent relay requests to the meshcentral server.
+// @Tags websocket
+// @Success 200 {object} string
+// @Router /meshrelay.ashx [get]
 func (h *Handler) ProxyRelay(rw http.ResponseWriter, r *http.Request) {
 	log.Info().Interface("headers", r.Header).Msg("Proxy reley")
 
@@ -19,6 +24,13 @@ func (h *Handler) ProxyRelay(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// ProxyAgent godoc
+// @Summary Forwards the agent control requests to the meshcentral server
+// @Tags websocket
+// @Param id path string true "session id"
+// @Param token path string true "the authentication token"
+// @Success 200 {object} string
+// @Router /agent/{id}:{token} [get]
 func (h *Handler) ProxyAgent(rw http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	token := chi.URLParam(r, "token")

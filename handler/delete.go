@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"io"
 	"net/http"
 
 	"github.com/cloudradar-monitoring/plexus/api"
@@ -9,18 +8,27 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// DeleteSession godoc
+// @Summary Delete a session.
+// @Tags session
+// @Produce  application/json
+// @Param id path string true "session id"
+// @Security BasicAuth
+// @Success 200 {object} api.Result
+// @Failure 400 {object} api.Error
+// @Failure 500 {object} api.Error
+// @Failure 502 {object} api.Error
+// @Router /session/{id} [delete]
 func (h *Handler) DeleteSession(rw http.ResponseWriter, r *http.Request) {
 	session, ok := h.basicAuth(rw, r, chi.URLParam(r, "id"))
 	if !ok {
 		return
 	}
 	if err := h.deleteInternal(session); err != nil {
-		api.WriteBadGateway(rw, err.Error())
+		api.WriteBadGatewayJSON(rw, err.Error())
 		return
 	}
-	rw.Header().Add("content-type", "text/plain")
-	rw.WriteHeader(http.StatusOK)
-	_, _ = io.WriteString(rw, "ok")
+	api.WriteResult(rw, http.StatusOK, "ok")
 }
 
 func (h *Handler) deleteInternal(s *Session) error {

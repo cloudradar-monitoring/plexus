@@ -13,6 +13,21 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// CreateSession godoc
+// @Summary Create a session.
+// @Description Create a plexus session where meshagents can connect to.
+// @Tags session
+// @Accept application/x-www-form-urlencoded
+// @Produce  application/json
+// @Param id formData string true "session id"
+// @Param ttl formData int true "the time to live for the session"
+// @Param username formData string true "the credentials to open the remote control interface & delete the session"
+// @Param password formData string true "the credentials to open the remote control interface & delete the session"
+// @Success 200 {object} api.Session
+// @Failure 400 {object} api.Error
+// @Failure 500 {object} api.Error
+// @Failure 502 {object} api.Error
+// @Router /session [post]
 func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	id := r.FormValue("id")
 	ttlStr := r.FormValue("ttl")
@@ -20,7 +35,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	pass := r.FormValue("password")
 	ttl, err := strconv.ParseInt(ttlStr, 10, 64)
 	if err != nil {
-		api.WriteBadRequest(rw, fmt.Sprintf("invalid ttl %s: %s", id, err))
+		api.WriteBadRequestJSON(rw, fmt.Sprintf("invalid ttl %s: %s", id, err))
 		return
 	}
 
@@ -28,24 +43,24 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	defer h.lock.Unlock()
 
 	if _, ok := h.sessions[id]; ok {
-		api.WriteBadRequest(rw, fmt.Sprintf("session with id %s does already exist", id))
+		api.WriteBadRequestJSON(rw, fmt.Sprintf("session with id %s does already exist", id))
 		return
 	}
 
 	mc, err := control.Connect(h.cfg)
 	defer mc.Close()
 	if err != nil {
-		api.WriteBadGateway(rw, fmt.Sprintf("could not connect to mesh control: %s", err))
+		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not connect to mesh control: %s", err))
 		return
 	}
 	mesh, err := mc.CreateMesh(h.cfg.MeshCentralGroupPrefix + "/" + id + "/" + token.New(5))
 	if err != nil {
-		api.WriteBadGateway(rw, fmt.Sprintf("could not create mesh: %s", err))
+		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not create mesh: %s", err))
 		return
 	}
 	serverID, err := mc.ServerID()
 	if err != nil {
-		api.WriteBadGateway(rw, fmt.Sprintf("could not get server id: %s", err))
+		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not get server id: %s", err))
 		return
 	}
 	sessionToken := token.NewAuth()

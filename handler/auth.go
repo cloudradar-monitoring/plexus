@@ -11,13 +11,13 @@ func (h *Handler) basicAuth(rw http.ResponseWriter, r *http.Request, id string) 
 	user, password, _ := r.BasicAuth()
 	session, ok := h.sessions[id]
 	if !ok {
-		api.WriteBadRequest(rw, fmt.Sprintf("session with id %s does not exist", id))
+		api.WriteBadRequestJSON(rw, fmt.Sprintf("session with id %s does not exist", id))
 		return nil, false
 	}
 
 	if session.Username != user || session.Password != password {
 		rw.Header().Add("WWW-Authenticate", `Basic realm="Plexus Session", charset="UTF-8"`)
-		api.WriteError(rw, http.StatusUnauthorized, fmt.Sprintf("invalid username / password"))
+		api.WriteJSONError(rw, http.StatusUnauthorized, fmt.Sprintf("invalid username / password"))
 		return nil, false
 	}
 	return session, true

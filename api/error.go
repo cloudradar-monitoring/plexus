@@ -2,42 +2,40 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"time"
 )
-
-type Session struct {
-	ID          string
-	SessionURL  string
-	AgentMSH    string
-	AgentConfig AgentConfig
-	ExpiresAt   time.Time
-}
-
-type AgentConfig struct {
-	ServerID   string
-	MeshName   string
-	MeshType   int
-	MeshID     string
-	MeshIDHex  string
-	MeshServer string
-}
 
 type Error struct {
 	Error       string
 	Description string
 }
 
-func WriteBadRequest(rw http.ResponseWriter, message string) {
-	WriteError(rw, http.StatusBadRequest, message)
+func WriteBadRequestJSON(rw http.ResponseWriter, message string) {
+	WriteJSONError(rw, http.StatusBadRequest, message)
 }
-func WriteBadGateway(rw http.ResponseWriter, message string) {
-	WriteError(rw, http.StatusBadGateway, message)
+func WriteBadGatewayJSON(rw http.ResponseWriter, message string) {
+	WriteJSONError(rw, http.StatusBadGateway, message)
 }
 
-func WriteError(rw http.ResponseWriter, code int, message string) {
+func WriteJSONError(rw http.ResponseWriter, code int, message string) {
+	rw.Header().Add("content-type", "application/json")
 	rw.WriteHeader(code)
 	_ = json.NewEncoder(rw).Encode(err(code, message))
+}
+
+func WriteBadRequestText(rw http.ResponseWriter, message string) {
+	WriteTextError(rw, http.StatusBadRequest, message)
+}
+func WriteBadGatewayText(rw http.ResponseWriter, message string) {
+	WriteTextError(rw, http.StatusBadGateway, message)
+}
+
+func WriteTextError(rw http.ResponseWriter, code int, message string) {
+	rw.Header().Add("content-type", "text/plain")
+	rw.WriteHeader(code)
+	fmt.Fprintln(rw, "Error:", http.StatusText(code))
+	fmt.Fprintln(rw, "Desription:", message)
 }
 
 func err(code int, message string) *Error {

@@ -9,6 +9,18 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// GetAgentMsh godoc
+// @Summary Gets the meshagent.msh for the given session.
+// @Tags session
+// @Produce  text/plain
+// @Param id path string true "session id"
+// @Param token path string true "auth token"
+// @Success 200 {object} string
+// @Failure 400 {object} string
+// @Failure 401 {object} string
+// @Failure 404 {object} string
+// @Failure 500 {object} string
+// @Router /config/{id}:{token} [get]
 func (h *Handler) GetAgentMsh(rw http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	token := chi.URLParam(r, "token")
@@ -17,12 +29,12 @@ func (h *Handler) GetAgentMsh(rw http.ResponseWriter, r *http.Request) {
 
 	session, ok := h.sessions[id]
 	if !ok {
-		api.WriteBadRequest(rw, fmt.Sprintf("session with id %s does not exist", id))
+		api.WriteTextError(rw, http.StatusNotFound, fmt.Sprintf("session with id %s does not exist", id))
 		return
 	}
 
 	if session.Token != token {
-		api.WriteError(rw, http.StatusUnauthorized, "invalid token")
+		api.WriteTextError(rw, http.StatusUnauthorized, "invalid token")
 		return
 	}
 	rw.Header().Add("content-type", "text/plain")
