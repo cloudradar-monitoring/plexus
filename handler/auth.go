@@ -15,10 +15,12 @@ func (h *Handler) basicAuth(rw http.ResponseWriter, r *http.Request, id string) 
 		return nil, false
 	}
 
-	if session.Username != user || session.Password != password {
-		rw.Header().Add("WWW-Authenticate", `Basic realm="Plexus Session", charset="UTF-8"`)
-		api.WriteJSONError(rw, http.StatusUnauthorized, "invalid username / password")
-		return nil, false
+	if session.Username != "" || session.Password != "" {
+		if session.Username != user || session.Password != password {
+			rw.Header().Add("WWW-Authenticate", `Basic realm="Plexus Session", charset="UTF-8"`)
+			api.WriteJSONError(rw, http.StatusUnauthorized, "invalid username / password")
+			return nil, false
+		}
 	}
 	return session, true
 }
