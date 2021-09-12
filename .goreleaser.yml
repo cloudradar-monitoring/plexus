@@ -1,0 +1,33 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+project_name: plexus
+before:
+  hooks:
+    - go mod download
+builds:
+  - env:
+      - CGO_ENABLED=0
+    main: cmd/plexus/main.go
+    goos:
+      - linux
+    goarch:
+      - amd64
+    flags:
+      - '-tags="netgo osusergo"'
+    ldflags:
+      - '-s'
+      - '-w'
+      - '-X main.version={{.Version}}'
+      - '-X main.commitHash={{.Commit}}'
+archives:
+  - files:
+      - LICENSE
+      - README.md
+    replacements:
+      386: i386
+    format_overrides:
+      - goos: windows
+        format: zip
+checksum:
+changelog:
+  skip: true
