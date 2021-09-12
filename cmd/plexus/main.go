@@ -16,12 +16,15 @@ import (
 )
 
 func main() {
-	logger.Init(zerolog.DebugLevel)
 	app := cli.App{
 		Commands: []*cli.Command{
 			{
 				Name: "serve",
 				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "log-level",
+						Value: "info",
+					},
 					&cli.StringFlag{
 						Name:     "tls-cert",
 						Required: true,
@@ -58,6 +61,11 @@ func main() {
 					},
 				},
 				Action: func(c *cli.Context) error {
+					lvl, err := zerolog.ParseLevel(c.String("log-level"))
+					if err != nil {
+						return fmt.Errorf("could not parse log level: %s", err)
+					}
+					logger.Init(lvl)
 					addr := c.String("addr")
 					cfg := &config.Server{
 						TLSPrivateKey:          c.String("tls-key"),
