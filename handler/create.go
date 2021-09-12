@@ -10,6 +10,7 @@ import (
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/token"
+	"github.com/rs/zerolog/log"
 )
 
 func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
@@ -65,6 +66,16 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		},
 	}
 	h.sessions[id] = session
+
+	go func() {
+		<-time.After(time.Duration(ttl) * time.Second)
+		h.lock.Lock()
+		defer h.lock.Unlock()
+		if s, ok := h.sessions[id]; ok {
+			log.Info().Str("id", id).Msg("Session Expired")
+			h.deleteInternal(s)
+		}
+	}()
 
 	rw.Header().Add("content-type", "application/json")
 	rw.WriteHeader(http.StatusCreated)

@@ -27,4 +27,5 @@ type Session struct {
 	Token              string
 	AgentConfig        api.AgentConfig
 	ShareURL           string
+	ProxyClose         func()
 }

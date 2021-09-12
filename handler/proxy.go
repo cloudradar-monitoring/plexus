@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-    "github.com/rs/zerolog/log"
 	"github.com/cloudradar-monitoring/plexus/proxy"
 	"github.com/go-chi/chi/v5"
+	"github.com/rs/zerolog/log"
 )
 
 func (h *Handler) ProxyRelay(rw http.ResponseWriter, r *http.Request) {
@@ -22,24 +22,17 @@ func (h *Handler) ProxyRelay(rw http.ResponseWriter, r *http.Request) {
 func (h *Handler) ProxyAgent(rw http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	token := chi.URLParam(r, "token")
-	success := func() bool {
-		h.lock.Lock()
-		defer h.lock.Unlock()
-		session, ok := h.sessions[id]
-		if !ok {
-			return false
-		}
 
-		if session.Token != token {
-			return false
-		}
-
-		return true
-	}()
-
-	if success {
-		proxy.Proxy(rw, r, h.cfg.MeshCentralAgentURL(), h.cfg.MeshCentralInsecure)
-	} else {
+	h.lock.Lock()
+	defer h.lock.Unlock()
+	session, ok := h.sessions[id]
+	if !ok || session.Token != token {
 		proxy.Hold(rw, r)
+		return
+	}
+
+	agentClose, ok := proxy.Proxy(rw, r, h.cfg.MeshCentralAgentURL(), h.cfg.MeshCentralInsecure)
+	if ok {
+		session.ProxyClose = agentClose
 	}
 }
