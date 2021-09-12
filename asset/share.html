@@ -7,7 +7,6 @@
     <style>
       html,
       body,
-      #share,
       #message-container {
         margin: 0;
         padding: 0;
@@ -50,25 +49,20 @@
       }
     </style>
     <script>
-      const loadIframe = (url) => {
-        const share = document.querySelector("#share");
-        const messageContainer = document.querySelector("#message-container");
-        share.setAttribute("src", url);
-        share.style.display = "block";
-        messageContainer.style.display = "none";
-      };
-
       window.onload = () => {
-        const handle = setInterval(() => {
+        let handle = undefined;
+        const tryGetUrl = () => {
           fetch("/session/{{.ID}}/url")
             .then((response) => response.json())
             .then((data) => {
               if (data.url) {
-                loadIframe(data.url);
                 clearInterval(handle);
+                window.location.href = data.url;
               }
             });
-        }, 1000);
+        };
+        tryGetUrl();
+        handle = setInterval(tryGetUrl, 1000);
       };
     </script>
   </head>
@@ -77,6 +71,5 @@
       <h1>Waiting for agent to connect</h1>
       <span class="spinner" />
     </div>
-    <iframe id="share" style="display: none;border: 0;" src="" />
   </body>
 </html>
