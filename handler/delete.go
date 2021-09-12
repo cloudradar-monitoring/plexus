@@ -3,9 +3,10 @@ package handler
 import (
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
-	"github.com/go-chi/chi/v5"
 )
 
 // DeleteSession godoc

@@ -4,15 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/urfave/cli/v2"
+
 	"github.com/cloudradar-monitoring/plexus/config"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/handler"
 	"github.com/cloudradar-monitoring/plexus/logger"
 	"github.com/cloudradar-monitoring/plexus/router"
 	"github.com/cloudradar-monitoring/plexus/server"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/urfave/cli/v2"
 )
 
 func main() {

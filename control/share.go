@@ -42,7 +42,7 @@ func (m *MeshCentral) Share(meshID, name string, expires time.Time) (string, err
 	if _, ok := payload["nodes"]; !ok {
 		return "", ErrAgentNotConnected
 	}
-	meshToNodes := map[string][]Node{}
+	meshToNodes := map[string][]*Node{}
 	if err := json.Unmarshal(payload["nodes"], &meshToNodes); err != nil {
 		return "", fmt.Errorf("could not unmarshal nodes response: %s", err)
 	}
@@ -54,7 +54,7 @@ func (m *MeshCentral) Share(meshID, name string, expires time.Time) (string, err
 	var found *Node
 	for _, node := range nodes {
 		if node.PWR == 1 && node.Conn == 1 {
-			found = &node
+			found = node
 			break
 		}
 	}

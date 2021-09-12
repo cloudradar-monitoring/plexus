@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/go-chi/chi/v5"
+
+	"github.com/cloudradar-monitoring/plexus/api"
 )
 
 // GetAgentMsh godoc

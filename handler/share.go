@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/asset"
 	"github.com/cloudradar-monitoring/plexus/control"
-	"github.com/go-chi/chi/v5"
 )
 
 // ShareSession godoc
@@ -33,7 +34,7 @@ func (h *Handler) ShareSession(rw http.ResponseWriter, r *http.Request) {
 
 	rw.Header().Add("content-type", "text/html")
 	rw.WriteHeader(http.StatusOK)
-	asset.ShareTemplate.Execute(rw, map[string]string{
+	_ = asset.ShareTemplate.Execute(rw, map[string]string{
 		"ID": session.ID,
 	})
 }
@@ -76,6 +77,10 @@ func (h *Handler) ShareSessionURL(rw http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) tryGetURL(rw http.ResponseWriter, session *Session) (string, bool) {
 	mc, err := control.Connect(h.cfg)
+	if err != nil {
+		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not connect: %s", err))
+		return "", true
+	}
 	defer mc.Close()
 	share, err := mc.Share(session.AgentConfig.MeshID, session.ID, session.ExpiresAt)
 	if err != nil && err != control.ErrAgentNotConnected {

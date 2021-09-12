@@ -14,13 +14,13 @@ func Hold(rw http.ResponseWriter, r *http.Request) {
 	agentConn, _, _, err := ws.UpgradeHTTP(r, rw)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
-		io.WriteString(rw, "upgrade failed "+err.Error())
+		_, _ = io.WriteString(rw, "upgrade failed "+err.Error())
 		log.Info().Err(err).Msg("Proxy: upgrade failed")
 		return
 	}
 	go func() {
 		defer agentConn.Close()
-		io.Copy(io.Discard, agentConn)
+		_, _ = io.Copy(io.Discard, agentConn)
 	}()
 }
 
@@ -28,10 +28,11 @@ func Proxy(rw http.ResponseWriter, r *http.Request, target string, insecure bool
 	agentConn, _, _, err := ws.UpgradeHTTP(r, rw)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
-		io.WriteString(rw, "upgrade failed "+err.Error())
+		_, _ = io.WriteString(rw, "upgrade failed "+err.Error())
 		log.Info().Err(err).Msg("Proxy: upgrade failed")
 		return nil, false
 	}
+	/* #nosec */
 	serverConn, _, _, err := ws.Dialer{
 		TLSConfig: &tls.Config{
 			InsecureSkipVerify: insecure,
@@ -39,23 +40,23 @@ func Proxy(rw http.ResponseWriter, r *http.Request, target string, insecure bool
 	}.Dial(context.Background(), target)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadGateway)
-		io.WriteString(rw, "could not reach meshcentral server "+err.Error())
+		_, _ = io.WriteString(rw, "could not reach meshcentral server "+err.Error())
 		log.Error().Err(err).Msg("Proxy: meshcentral unavailable")
 		return nil, false
 	}
 
 	closeAll := func() {
-		agentConn.Close()
-		serverConn.Close()
+		_ = agentConn.Close()
+		_ = serverConn.Close()
 	}
 
 	go func() {
 		defer closeAll()
-		io.Copy(agentConn, serverConn)
+		_, _ = io.Copy(agentConn, serverConn)
 	}()
 	go func() {
 		defer closeAll()
-		io.Copy(serverConn, agentConn)
+		_, _ = io.Copy(serverConn, agentConn)
 	}()
 	return closeAll, true
 }

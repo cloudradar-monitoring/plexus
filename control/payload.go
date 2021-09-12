@@ -21,7 +21,7 @@ func (p Payload) String(name string) (string, error) {
 
 func (p Payload) Error() error {
 	result, _ := p.String("result")
-	if strings.ToLower(result) == "ok" || result == "" {
+	if strings.EqualFold(result, "ok") || result == "" {
 		return nil
 	}
 	return fmt.Errorf("result: %s :: %s", result, p.raw())

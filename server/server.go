@@ -22,13 +22,13 @@ func Start(handler http.Handler, addr, certFile, keyFile string) error {
 	return waitForServerToClose(shutdown)
 }
 
-func startServer(handler http.Handler, addr string, certFile, keyFile string) (*http.Server, chan error) {
-	srv := &http.Server{
+func startServer(handler http.Handler, addr, certFile, keyFile string) (srv *http.Server, shutdown chan error) {
+	srv = &http.Server{
 		Addr:    addr,
 		Handler: handler,
 	}
 
-	shutdown := make(chan error)
+	shutdown = make(chan error)
 	go func() {
 		err := srv.ListenAndServeTLS(certFile, keyFile)
 		shutdown <- err
@@ -41,14 +41,12 @@ func shutdownOnInterruptSignal(server *http.Server, timeout time.Duration, shutd
 	notifySignal(interrupt, os.Interrupt)
 
 	go func() {
-		select {
-		case <-interrupt:
-			log.Info().Msg("Received interrupt, shutting down")
-			ctx, cancel := context.WithTimeout(context.Background(), timeout)
-			defer cancel()
-			if err := serverShutdown(server, ctx); err != nil {
-				shutdown <- err
-			}
+		<-interrupt
+		log.Info().Msg("Received interrupt, shutting down")
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
+		defer cancel()
+		if err := serverShutdown(server, ctx); err != nil {
+			shutdown <- err
 		}
 	}()
 }

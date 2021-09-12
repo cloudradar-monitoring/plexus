@@ -13,11 +13,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cloudradar-monitoring/plexus/config"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 	"github.com/rs/zerolog/log"
+
+	"github.com/cloudradar-monitoring/plexus/config"
 )
+
+const GetTimeout = 5 * time.Second
 
 func Connect(cfg *config.Server) (*MeshCentral, error) {
 	mc := &MeshCentral{
@@ -26,7 +29,8 @@ func Connect(cfg *config.Server) (*MeshCentral, error) {
 		cfg:            cfg,
 	}
 
-	return mc, mc.connect()
+	err := mc.connect()
+	return mc, err
 }
 
 type MeshCentral struct {
@@ -37,23 +41,23 @@ type MeshCentral struct {
 	conn           net.Conn
 }
 
-func (m *MeshCentral) Close() error {
+func (m *MeshCentral) Close() {
 	log.Debug().Msg("MeshControl: Disconnect")
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	if m.conn != nil {
-		return m.conn.Close()
+		m.conn.Close()
 	}
-	return nil
 }
 
 func (m *MeshCentral) connect() error {
 	user := base64.StdEncoding.EncodeToString([]byte(m.cfg.MeshCentralUsername))
 	pass := base64.StdEncoding.EncodeToString([]byte(m.cfg.MeshCentralPassword))
 	auth := user + "," + pass
+	/* #nosec */
 	conn, _, _, err := ws.Dialer{
 		TLSConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: m.cfg.MeshCentralInsecure,
 		},
 		Header: ws.HandshakeHeaderHTTP(http.Header{
 			"x-meshauth": []string{auth},
@@ -127,7 +131,7 @@ func (m *MeshCentral) Get(action string) (Payload, error) {
 	select {
 	case payload := <-callback:
 		return payload, payload.Error()
-	case <-time.After(5 * time.Second):
+	case <-time.After(GetTimeout):
 		m.mutex.Lock()
 		defer m.mutex.Unlock()
 		select {

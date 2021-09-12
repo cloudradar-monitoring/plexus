@@ -54,5 +54,4 @@ func (m *MeshCentral) DeleteMesh(id string) error {
 		return fmt.Errorf("could not delete meshes: %s", err)
 	}
 	return nil
-
 }

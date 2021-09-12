@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cloudradar-monitoring/plexus/handler"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog/log"
+
+	"github.com/cloudradar-monitoring/plexus/handler"
 )
 
 // @title Plexus API
@@ -42,7 +43,7 @@ func accessLog(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		h.ServeHTTP(rw, r)
-		duration := time.Now().Sub(start)
+		duration := time.Since(start)
 
 		log.Info().
 			Str("host", r.Host).

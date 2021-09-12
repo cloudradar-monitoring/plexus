@@ -7,10 +7,11 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/rs/zerolog/log"
+
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/token"
-	"github.com/rs/zerolog/log"
 )
 
 // CreateSession godoc
@@ -88,13 +89,16 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		defer h.lock.Unlock()
 		if s, ok := h.sessions[id]; ok {
 			log.Info().Str("id", id).Msg("Session Expired")
-			h.deleteInternal(s)
+			err := h.deleteInternal(s)
+			if err != nil {
+				log.Err(err).Str("id", id).Msg("Could not clean session")
+			}
 		}
 	}()
 
 	rw.Header().Add("content-type", "application/json")
 	rw.WriteHeader(http.StatusCreated)
-	json.NewEncoder(rw).Encode(&api.Session{
+	_ = json.NewEncoder(rw).Encode(&api.Session{
 		ID:          id,
 		AgentMSH:    fmt.Sprintf("https://%s/config/%s:%s", h.cfg.Host(r), id, session.Token),
 		SessionURL:  fmt.Sprintf("https://%s/session/%s", h.cfg.Host(r), id),

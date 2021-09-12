@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cloudradar-monitoring/plexus/proxy"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
+
+	"github.com/cloudradar-monitoring/plexus/proxy"
 )
 
 // ProxyRelay godoc
