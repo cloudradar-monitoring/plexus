@@ -12,21 +12,11 @@ import (
 )
 
 func (h *Handler) ShareSession(rw http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-
-	user, password, _ := r.BasicAuth()
-
 	h.lock.Lock()
 	defer h.lock.Unlock()
-	session, ok := h.sessions[id]
-	if !ok {
-		api.WriteBadRequest(rw, fmt.Sprintf("session with id %s does not exist", id))
-		return
-	}
 
-	if session.Username != user || session.Password != password {
-		rw.Header().Add("WWW-Authenticate", `Basic realm="Plexus Session", charset="UTF-8"`)
-		api.WriteError(rw, http.StatusUnauthorized, fmt.Sprintf("invalid username / password"))
+	session, ok := h.basicAuth(rw, r, chi.URLParam(r, "id"))
+	if !ok {
 		return
 	}
 
@@ -38,21 +28,11 @@ func (h *Handler) ShareSession(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ShareSessionURL(rw http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-
-	user, password, _ := r.BasicAuth()
-
 	h.lock.Lock()
 	defer h.lock.Unlock()
-	session, ok := h.sessions[id]
-	if !ok {
-		api.WriteBadRequest(rw, fmt.Sprintf("session with id %s does not exist", id))
-		return
-	}
 
-	if session.Username != user || session.Password != password {
-		rw.Header().Add("WWW-Authenticate", `Basic realm="Plexus Session", charset="UTF-8"`)
-		api.WriteError(rw, http.StatusUnauthorized, fmt.Sprintf("invalid username / password"))
+	session, ok := h.basicAuth(rw, r, chi.URLParam(r, "id"))
+	if !ok {
 		return
 	}
 
