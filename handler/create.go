@@ -37,7 +37,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		api.WriteBadGateway(rw, fmt.Sprintf("could not connect to mesh control: %s", err))
 		return
 	}
-	mesh, err := mc.CreateMesh("plexus/" + id + "/" + token.New(5))
+	mesh, err := mc.CreateMesh(h.cfg.MeshCentralGroupPrefix + "/" + id + "/" + token.New(5))
 	if err != nil {
 		api.WriteBadGateway(rw, fmt.Sprintf("could not create mesh: %s", err))
 		return

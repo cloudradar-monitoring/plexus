@@ -5,14 +5,15 @@ import (
 )
 
 type Server struct {
-	ExternalHost        string
-	TLSPrivateKey       string
-	TLSCertificate      string
-	MeshCentralURL      string
-	MeshCentralUsername string
-	MeshCentralPassword string
-	MeshCentralInsecure bool
-	ServerID            string
+	ExternalHost           string
+	TLSPrivateKey          string
+	TLSCertificate         string
+	MeshCentralURL         string
+	MeshCentralUsername    string
+	MeshCentralPassword    string
+	MeshCentralInsecure    bool
+	MeshCentralGroupPrefix string
+	ServerID               string
 }
 
 func (s *Server) MeshCentralControlURL() string {

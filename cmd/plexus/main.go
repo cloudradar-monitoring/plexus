@@ -42,6 +42,10 @@ func main() {
 						Name:     "meshcentral-pass",
 						Required: true,
 					},
+					&cli.StringFlag{
+						Name:  "meshcentral-group-prefix",
+						Value: "plexus",
+					},
 					&cli.BoolFlag{
 						Name: "meshcentral-insecure",
 					},
@@ -56,13 +60,14 @@ func main() {
 				Action: func(c *cli.Context) error {
 					addr := c.String("addr")
 					cfg := &config.Server{
-						TLSPrivateKey:       c.String("tls-key"),
-						TLSCertificate:      c.String("tls-cert"),
-						MeshCentralURL:      c.String("meshcentral-url"),
-						MeshCentralUsername: c.String("meshcentral-user"),
-						MeshCentralPassword: c.String("meshcentral-pass"),
-						MeshCentralInsecure: c.Bool("meshcentral-insecure"),
-						ExternalHost:        c.String("external-host"),
+						TLSPrivateKey:          c.String("tls-key"),
+						TLSCertificate:         c.String("tls-cert"),
+						MeshCentralURL:         c.String("meshcentral-url"),
+						MeshCentralUsername:    c.String("meshcentral-user"),
+						MeshCentralPassword:    c.String("meshcentral-pass"),
+						MeshCentralInsecure:    c.Bool("meshcentral-insecure"),
+						MeshCentralGroupPrefix: c.String("meshcentral-group-prefix"),
+						ExternalHost:           c.String("external-host"),
 					}
 
 					mc, err := control.Connect(cfg)
@@ -75,6 +80,9 @@ func main() {
 						return fmt.Errorf("could not get server id: %s", err)
 					}
 					log.Info().Str("user", cfg.MeshCentralUsername).Str("serverID", serverID).Msg("MeshControl: Authenticated")
+					if err := mc.DeleteMeshes(); err != nil {
+						return fmt.Errorf("could not clean old meshes: %s", err)
+					}
 					mc.Close()
 
 					h := handler.New(cfg)
