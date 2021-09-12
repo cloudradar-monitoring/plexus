@@ -102,7 +102,7 @@ func main() {
 		},
 	}
 	if err := app.Run(os.Args); err != nil {
-		log.Error().Err(err).Msg("App")
+		fmt.Println(err)
 		os.Exit(1)
 	}
 }
