@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "prestart": "node node_modules/meshcentral --createaccount plexus --pass plexus",
+    "start": "node node_modules/meshcentral --tlsoffload --exactports --port 8086 --redirport 8087"
+  },
+  "dependencies": {
+    "archiver": "^4.0.2",
+    "meshcentral": "^0.9.25",
+    "otplib": "^10.2.3"
+  }
+}

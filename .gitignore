@@ -5,6 +5,9 @@
 *.so
 *.dylib
 
+dev/node_modules
+dev/meshcentral-data
+
 # Test binary, built with `go test -c`
 *.test
 

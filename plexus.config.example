@@ -1,0 +1,23 @@
+# The TLS cert file
+PLEXUS_TLS_CERT_FILE=
+# The TLS key file
+PLEXUS_TLS_KEY_FILE=
+
+# The URL of the meshcentral server.
+PLEXUS_MESH_CENTRAL_URL=
+# The MeshCentral account username.
+PLEXUS_MESH_CENTRAL_USER=
+# The MeshCentral account password.
+PLEXUS_MESH_CENTRAL_PASS=
+# The MeshCentral group prefix. (must only be set if you want to use multiple
+# plexus instances with one MeshCentral instance)
+PLEXUS_MESH_CENTRAL_PASS=plexus
+
+# The address plexus will listen on.
+PLEXUS_SERVER_ADDRESS=0.0.0.0:8080
+
+# The loglevel (one of: debug, info, warn, error)
+PLEXUS_LOG_LEVEL=info
+
+# Log everything to a file.
+PLEXUS_LOG_FILE=

@@ -19,7 +19,7 @@ func (h *Handler) ProxyRelay(rw http.ResponseWriter, r *http.Request) {
 	log.Info().Interface("headers", r.Header).Msg("Proxy reley")
 
 	proxyURL := fmt.Sprintf("%s?%s", h.cfg.MeshRelayURL(), r.URL.RawQuery)
-	_, ok := proxy.Proxy(rw, r, proxyURL, h.cfg.MeshCentralInsecure)
+	_, ok := proxy.Proxy(rw, r, proxyURL)
 	if ok {
 		log.Debug().Str("url", r.URL.String()).Msg("MeshRelay Connected")
 	}
@@ -44,7 +44,7 @@ func (h *Handler) ProxyAgent(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	agentClose, ok := proxy.Proxy(rw, r, h.cfg.MeshCentralAgentURL(), h.cfg.MeshCentralInsecure)
+	agentClose, ok := proxy.Proxy(rw, r, h.cfg.MeshCentralAgentURL())
 	if ok {
 		session.ProxyClose = agentClose
 	}

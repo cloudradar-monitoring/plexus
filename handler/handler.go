@@ -8,7 +8,7 @@ import (
 	"github.com/cloudradar-monitoring/plexus/config"
 )
 
-func New(cfg *config.Server) *Handler {
+func New(cfg *config.Config) *Handler {
 	return &Handler{
 		cfg:      cfg,
 		sessions: make(map[string]*Session),
@@ -16,7 +16,7 @@ func New(cfg *config.Server) *Handler {
 }
 
 type Handler struct {
-	cfg      *config.Server
+	cfg      *config.Config
 	lock     sync.RWMutex
 	sessions map[string]*Session
 }

@@ -77,7 +77,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			MeshIDHex:  mesh.IDHex,
 			MeshID:     mesh.ID,
 			ServerID:   serverID,
-			MeshServer: fmt.Sprintf("wss://%s/agent/%s:%s", h.cfg.Host(r), id, sessionToken),
+			MeshServer: fmt.Sprintf("wss://%s/agent/%s:%s", r.Host, id, sessionToken),
 			MeshType:   2,
 		},
 	}
@@ -100,8 +100,8 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(rw).Encode(&api.Session{
 		ID:          id,
-		AgentMSH:    fmt.Sprintf("https://%s/config/%s:%s", h.cfg.Host(r), id, session.Token),
-		SessionURL:  fmt.Sprintf("https://%s/session/%s", h.cfg.Host(r), id),
+		AgentMSH:    fmt.Sprintf("https://%s/config/%s:%s", r.Host, id, session.Token),
+		SessionURL:  fmt.Sprintf("https://%s/session/%s", r.Host, id),
 		AgentConfig: session.AgentConfig,
 		ExpiresAt:   session.ExpiresAt,
 	})

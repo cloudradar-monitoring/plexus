@@ -2,7 +2,6 @@ package control
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -22,7 +21,7 @@ import (
 
 const GetTimeout = 5 * time.Second
 
-func Connect(cfg *config.Server) (*MeshCentral, error) {
+func Connect(cfg *config.Config) (*MeshCentral, error) {
 	mc := &MeshCentral{
 		pendingActions: make(map[string]Payload),
 		waitFor:        make(map[string]chan<- Payload),
@@ -37,7 +36,7 @@ type MeshCentral struct {
 	mutex          sync.Mutex
 	pendingActions map[string]Payload
 	waitFor        map[string]chan<- Payload
-	cfg            *config.Server
+	cfg            *config.Config
 	conn           net.Conn
 }
 
@@ -51,14 +50,10 @@ func (m *MeshCentral) Close() {
 }
 
 func (m *MeshCentral) connect() error {
-	user := base64.StdEncoding.EncodeToString([]byte(m.cfg.MeshCentralUsername))
-	pass := base64.StdEncoding.EncodeToString([]byte(m.cfg.MeshCentralPassword))
+	user := base64.StdEncoding.EncodeToString([]byte(m.cfg.MeshCentralUser))
+	pass := base64.StdEncoding.EncodeToString([]byte(m.cfg.MeshCentralPass))
 	auth := user + "," + pass
-	/* #nosec */
 	conn, _, _, err := ws.Dialer{
-		TLSConfig: &tls.Config{
-			InsecureSkipVerify: m.cfg.MeshCentralInsecure,
-		},
 		Header: ws.HandshakeHeaderHTTP(http.Header{
 			"x-meshauth": []string{auth},
 		}),

@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"context"
-	"crypto/tls"
 	"io"
 	"net/http"
 
@@ -24,7 +23,7 @@ func Hold(rw http.ResponseWriter, r *http.Request) {
 	}()
 }
 
-func Proxy(rw http.ResponseWriter, r *http.Request, target string, insecure bool) (func(), bool) {
+func Proxy(rw http.ResponseWriter, r *http.Request, target string) (func(), bool) {
 	agentConn, _, _, err := ws.UpgradeHTTP(r, rw)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
@@ -32,12 +31,7 @@ func Proxy(rw http.ResponseWriter, r *http.Request, target string, insecure bool
 		log.Info().Err(err).Msg("Proxy: upgrade failed")
 		return nil, false
 	}
-	/* #nosec */
-	serverConn, _, _, err := ws.Dialer{
-		TLSConfig: &tls.Config{
-			InsecureSkipVerify: insecure,
-		},
-	}.Dial(context.Background(), target)
+	serverConn, _, _, err := ws.Dialer{}.Dial(context.Background(), target)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadGateway)
 		_, _ = io.WriteString(rw, "could not reach meshcentral server "+err.Error())
