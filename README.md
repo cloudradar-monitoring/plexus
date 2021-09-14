@@ -66,3 +66,18 @@ To create a remote control session, follow these steps:
 1. Open the `.SessionURL` from the create session response in your favorite browser.
 
 1. Click 'connect' on the upper left and the remote control should've started.
+
+## Development
+
+1. Start the development MeshCentral server:
+
+   ```bash
+   $ (cd dev && npm install)
+   $ (cd dev && npm start)
+   ```
+
+1. Start Plexus with the development config:
+
+   ```bash
+   $ go run ./cmd/plexus -c plexus.config.development
+   ```
