@@ -17,6 +17,7 @@ var (
 // Config represents the application configuration.
 type Config struct {
 	LogLevel LogLevel `default:"info" split_words:"true"`
+	LogFile  string   `split_words:"true"`
 
 	ServerAddress string `default:":5050" split_words:"true"`
 

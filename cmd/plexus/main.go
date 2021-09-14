@@ -28,7 +28,11 @@ func main() {
 		},
 		Action: func(c *cli.Context) error {
 			cfg, errs := config.Get(c.String("config"))
-			logger.Init(cfg.LogLevel.AsZeroLogLevel())
+			handle, err := logger.Init(cfg.LogLevel.AsZeroLogLevel(), cfg.LogFile)
+			if err != nil {
+				return err
+			}
+			defer handle.Close()
 
 			exit := false
 			for _, err := range errs {
