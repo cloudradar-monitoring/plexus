@@ -6,6 +6,8 @@
 *.dylib
 
 dev/meshcentral-data/*
+dev/meshcentral-backup/*
+dev/meshcentral-files/*
 !dev/meshcentral-data/webserver-cert*
 !dev/meshcentral-data/config.json
 dev/node_modules
