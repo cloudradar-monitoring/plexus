@@ -46,7 +46,7 @@ func accessLog(h http.Handler) http.Handler {
 		h.ServeHTTP(rw, r)
 		duration := time.Since(start)
 
-		log.Info().
+		log.Debug().
 			Str("host", r.Host).
 			Str("ip", r.RemoteAddr).
 			Str("path", r.URL.Path).
