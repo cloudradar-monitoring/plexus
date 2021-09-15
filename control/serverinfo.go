@@ -5,20 +5,22 @@ import (
 	"fmt"
 )
 
-type serverInfo struct {
+type ServerInfo struct {
 	AgentHash string `json:"agentCertHash"`
+	TLSHash   string `json:"tlshash"`
 }
 
-func (m *MeshCentral) ServerID() (string, error) {
+func (m *MeshCentral) ServerInfo() (*ServerInfo, error) {
 	payload, err := m.Get("serverinfo")
 	if err != nil {
-		return "", fmt.Errorf("no event: %s", err)
+		return nil, fmt.Errorf("could not get server info: %s", err)
 	}
 
-	info := serverInfo{}
+	info := ServerInfo{}
 	if err := json.Unmarshal(payload["serverinfo"], &info); err != nil {
-		return "", fmt.Errorf("could not parse agent hash: %s", err)
+		return nil, fmt.Errorf("could not parse server info: %s", err)
 	}
 
-	return base64IDToHex(info.AgentHash)
+	info.AgentHash, err = base64IDToHex(info.AgentHash)
+	return &info, err
 }

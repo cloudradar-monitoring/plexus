@@ -79,5 +79,5 @@ To create a remote control session, follow these steps:
 1. Start Plexus with the development config:
 
    ```bash
-   $ go run ./cmd/plexus -c plexus.config.development
+   $ go run ./cmd/plexus -c plexus.config.development serve
    ```

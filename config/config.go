@@ -78,7 +78,7 @@ func Get(file string) (Config, []futureLog) {
 
 	config.MeshCentralURLParsed, err = url.Parse(config.MeshCentralURL)
 	if err != nil {
-		logs = append(logs, futureFatal(fmt.Sprintf("meshcentral url invalid: %s", err)))
+		logs = append(logs, futureFatal(fmt.Sprintf("PLEXUS_MESH_CENTRAL_URL is invalid: %s", err)))
 	}
 
 	return config, logs

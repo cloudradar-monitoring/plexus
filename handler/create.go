@@ -59,7 +59,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not create mesh: %s", err))
 		return
 	}
-	serverID, err := mc.ServerID()
+	serverInfo, err := mc.ServerInfo()
 	if err != nil {
 		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not get server id: %s", err))
 		return
@@ -76,7 +76,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			MeshName:   mesh.Name,
 			MeshIDHex:  mesh.IDHex,
 			MeshID:     mesh.ID,
-			ServerID:   serverID,
+			ServerID:   serverInfo.AgentHash,
 			MeshServer: fmt.Sprintf("wss://%s/agent/%s:%s", r.Host, id, sessionToken),
 			MeshType:   2,
 		},

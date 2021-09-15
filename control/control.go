@@ -25,6 +25,7 @@ func Connect(cfg *config.Config) (*MeshCentral, error) {
 	mc := &MeshCentral{
 		pendingActions: make(map[string]Payload),
 		waitFor:        make(map[string]chan<- Payload),
+		dead:           make(chan error, 1),
 		cfg:            cfg,
 	}
 
@@ -38,6 +39,7 @@ type MeshCentral struct {
 	waitFor        map[string]chan<- Payload
 	cfg            *config.Config
 	conn           net.Conn
+	dead           chan error
 }
 
 func (m *MeshCentral) Close() {
@@ -74,9 +76,10 @@ func (m *MeshCentral) connect() error {
 			if err != nil {
 				if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
 					log.Trace().Err(err).Str("body", string(msg)).Msg("Control Read")
-					return
+				} else {
+					log.Warn().Err(err).Str("body", string(msg)).Msg("Control Read")
 				}
-				log.Warn().Err(err).Str("body", string(msg)).Msg("Control Read")
+				m.dead <- err
 				return
 			}
 
@@ -107,6 +110,11 @@ func (m *MeshCentral) connect() error {
 }
 
 func (m *MeshCentral) Get(action string) (Payload, error) {
+	select {
+	case err := <-m.dead:
+		return nil, err
+	default:
+	}
 	m.mutex.Lock()
 	if pending, ok := m.pendingActions[action]; ok {
 		delete(m.pendingActions, action)
@@ -126,6 +134,8 @@ func (m *MeshCentral) Get(action string) (Payload, error) {
 	select {
 	case payload := <-callback:
 		return payload, payload.Error()
+	case err := <-m.dead:
+		return nil, err
 	case <-time.After(GetTimeout):
 		m.mutex.Lock()
 		defer m.mutex.Unlock()
@@ -140,6 +150,11 @@ func (m *MeshCentral) Get(action string) (Payload, error) {
 }
 
 func (m *MeshCentral) Send(payload map[string]interface{}) error {
+	select {
+	case err := <-m.dead:
+		return err
+	default:
+	}
 	log.Debug().Interface("payload", payload).Msg("Control Write")
 	payloadBytes, err := json.Marshal(&payload)
 	if err != nil {
