@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -82,10 +83,13 @@ func (m *MeshCentral) Share(meshID, name string, expires time.Time) (string, err
 		return "", fmt.Errorf("could not get create response: %s", err)
 	}
 
-	url, err := payload.String("url")
+	shareURL, err := payload.String("url")
 	if err != nil {
 		return "", fmt.Errorf("could not unmarshal url: %s", err)
 	}
-
-	return url, nil
+	parsed, err := url.Parse(shareURL)
+	if err != nil {
+		return "", fmt.Errorf("invalid url from mesh control: %s", err)
+	}
+	return parsed.Path + "?" + parsed.RawQuery, nil
 }

@@ -8,11 +8,11 @@ import (
 )
 
 func base64MeshIDToHexMeshID(id string) (string, error) {
-	parts := strings.Split(id, "//")
-	if len(parts) != 2 {
+	parts := strings.Split(id, "/")
+	if len(parts) != 3 {
 		return "", errors.New("invalid id")
 	}
-	id, err := base64IDToHex(parts[1])
+	id, err := base64IDToHex(parts[2])
 	return "0x" + id, err
 }
 

@@ -3,6 +3,8 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"net/http/httputil"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/zerolog/log"
@@ -10,13 +12,31 @@ import (
 	"github.com/cloudradar-monitoring/plexus/proxy"
 )
 
+func (h *Handler) ProxyMeshCentralURL() string {
+	return fmt.Sprintf("/%s/*", h.cfg.MeshCentralDomain)
+}
+func (h *Handler) ProxyMeshCentral() http.Handler {
+	director := func(req *http.Request) {
+		if strings.HasPrefix(req.URL.Scheme, "ws") {
+			req.URL.Scheme = "ws"
+		} else {
+			req.URL.Scheme = "http"
+		}
+		req.URL.Host = h.cfg.MeshCentralURLParsed.Host
+		req.Header.Set("User-Agent", "plexus")
+	}
+	return &httputil.ReverseProxy{
+		Director: director,
+	}
+}
+
 // ProxyRelay godoc
 // @Summary Forwards meshagent relay requests to the meshcentral server.
 // @Tags websocket
 // @Success 200 {object} string
 // @Router /meshrelay.ashx [get]
 func (h *Handler) ProxyRelay(rw http.ResponseWriter, r *http.Request) {
-	log.Info().Interface("headers", r.Header).Msg("Proxy reley")
+	log.Info().Interface("headers", r.Header).Msg("Proxy Relay")
 
 	proxyURL := fmt.Sprintf("%s?%s", h.cfg.MeshRelayURL(), r.URL.RawQuery)
 	_, ok := proxy.Proxy(rw, r, proxyURL)

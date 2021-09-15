@@ -37,6 +37,7 @@ func New(h *handler.Handler) http.Handler {
 	r.Get("/config/{id}:{token}", h.GetAgentMsh)
 	r.Get("/agent/{id}:{token}", h.ProxyAgent)
 	r.Get("/meshrelay.ashx", h.ProxyRelay)
+	r.Handle(h.ProxyMeshCentralURL(), h.ProxyMeshCentral())
 	return r
 }
 func accessLog(h http.Handler) http.Handler {

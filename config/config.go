@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 
@@ -25,21 +26,23 @@ type Config struct {
 	TLSKeyFile  string `split_words:"true" required:"true"`
 
 	MeshCentralURL         string `split_words:"true" required:"true"`
+	MeshCentralURLParsed   *url.URL
 	MeshCentralGroupPrefix string `split_words:"true" default:"plexus"`
 	MeshCentralUser        string `split_words:"true" required:"true"`
 	MeshCentralPass        string `split_words:"true" required:"true"`
+	MeshCentralDomain      string `split_words:"true" default:"control"`
 
 	ExternalHost string `split_words:"true"`
 }
 
 func (s *Config) MeshCentralControlURL() string {
-	return s.MeshCentralURL + "/control.ashx"
+	return s.MeshCentralURL + "/" + s.MeshCentralDomain + "/control.ashx"
 }
 func (s *Config) MeshCentralAgentURL() string {
-	return s.MeshCentralURL + "/agent.ashx"
+	return s.MeshCentralURL + "/" + s.MeshCentralDomain + "/agent.ashx"
 }
 func (s *Config) MeshRelayURL() string {
-	return s.MeshCentralURL + "/meshrelay.ashx"
+	return s.MeshCentralURL + "/" + s.MeshCentralDomain + "/meshrelay.ashx"
 }
 
 // Get loads the application config.
@@ -71,6 +74,11 @@ func Get(file string) (Config, []futureLog) {
 
 	if strings.HasPrefix(config.MeshCentralURL, "http") {
 		config.MeshCentralURL = strings.Replace(config.MeshCentralURL, "http", "ws", 1)
+	}
+
+	config.MeshCentralURLParsed, err = url.Parse(config.MeshCentralURL)
+	if err != nil {
+		logs = append(logs, futureFatal(fmt.Sprintf("meshcentral url invalid: %s", err)))
 	}
 
 	return config, logs

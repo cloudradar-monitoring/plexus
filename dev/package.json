@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "prestart": "node node_modules/meshcentral --createaccount plexus --pass plexus",
-    "start": "node node_modules/meshcentral --tlsoffload --exactports --port 8086 --redirport 8087"
+    "prestart": "node node_modules/meshcentral --createaccount plexus --pass plexus --domain control",
+    "start": "node node_modules/meshcentral"
   },
   "dependencies": {
     "archiver": "^4.0.2",

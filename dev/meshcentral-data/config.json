@@ -1,0 +1,16 @@
+{
+  "$schema": "http://info.meshcentral.com/downloads/meshcentral-config-schema.json",
+  "settings": {
+    "port": 8086,
+    "redirPort": 8087,
+    "exactports": true,
+    "debug": true,
+    "tlsoffload": true
+  },
+  "domains": {
+    "control": {
+      "title": "Plexus Control",
+      "newAccounts": false
+    }
+  }
+}
