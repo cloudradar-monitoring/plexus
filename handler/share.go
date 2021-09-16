@@ -61,7 +61,7 @@ func (h *Handler) ShareSessionURL(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if session.ShareURL == "" {
-		url, exit := h.tryGetURL(rw, r.Host, session)
+		url, exit := h.tryGetURL(rw, session)
 		if exit {
 			return
 		}
@@ -75,7 +75,7 @@ func (h *Handler) ShareSessionURL(rw http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *Handler) tryGetURL(rw http.ResponseWriter, host string, session *Session) (string, bool) {
+func (h *Handler) tryGetURL(rw http.ResponseWriter, session *Session) (string, bool) {
 	mc, err := control.Connect(h.cfg)
 	if err != nil {
 		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not connect: %s", err))
@@ -87,5 +87,5 @@ func (h *Handler) tryGetURL(rw http.ResponseWriter, host string, session *Sessio
 		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not create share: %s", err))
 		return "", true
 	}
-	return "https://" + host + share, false
+	return share, false
 }
