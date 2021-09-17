@@ -11,13 +11,31 @@ Plexus is a proxy server that depends on a MeshCentral server.
 
 ### Prerequisites
 
+#### Install needed helper
+On Debian/Ubuntu you need the following packages:
+```bash
+$ apt-get install jq certbot
+```
+
 #### Create a user for Plexus
 
-Plexus doesn't need root root privileges to function. Therefore, it is
+Plexus doesn't need root privileges to function. Therefore, it is
 recommended to create a new user account:
 
 ```bash
 $ sudo useradd -d /var/lib/plexus -m -U -r -s /bin/false plexus
+```
+
+#### Define variables for the installation
+
+During the installation, we need two variables to be accessible from different user account. 
+1. Define the FQDN of your installation. We assume your server has a public DNS record. This is mandatory to create SSL certificates with Let's encrypt.
+```bash
+$ echo 'FQDN=plexus.example.com' > /tmp/install-vars
+```
+2. We need a password for the Meshcentral server. Let's creare a secure random password.
+```
+$ echo "PASSWD=$(openssl rand -hex 30)" >> /tmp/install-vars
 ```
 
 #### TLS certificate
@@ -28,13 +46,14 @@ publicly resolvable FQDN along with certificates trusted by all browser, for
 example using Let's encrypt:
 
 ```bash
-$ FQDN=plexus.example.com
+$ . /tmp/install-vars
 $ certbot certonly -d $FQDN -n --agree-tos --standalone --register-unsafely-without-email
 ```
 
 Change permissions that the Plexus user can access the keys and certificates:
 
 ```bash
+$ . /tmp/install-vars
 $ chgrp -R plexus /etc/letsencrypt
 $ chmod -R g=rx /etc/letsencrypt
 ```
@@ -132,7 +151,7 @@ $ chmod -R g=rx /etc/letsencrypt
 1. Create a user on the MeshCentral server, that Plexus will use for internal connections.
 
    ```bash
-   $ PASSWD=$(openssl rand -hex 30)
+   $ . /tmp/install-vars
    $ node node_modules/meshcentral --createaccount plexus --pass "${PASSWD}" --domain control
    ```
 
@@ -212,6 +231,7 @@ Resources
 1. Create a Plexus configuration file.
 
    ```bash
+   $ . /tmp/install-vars
    $ mkdir /etc/plexus
    $ cat << EOF > /etc/plexus/plexus.conf
    # The TLS cert file
@@ -298,17 +318,17 @@ To create a remote control session, follow these steps:
 1. Create a new session:
 
    ```bash
-   $ curl https://localhost:8080/session \
+   $ curl -ks https://localhost:8080/session \
           -F id="helping-joe" \
           -F ttl=3600 \
           -F username=admin \
-          -F password=foobaz
+          -F password=foobaz |jq
    ```
 
-   - username / password is optional and will be asked when opening session
+   - `username` / `password` is optional and will be asked when opening the session
      inside the browser or deleting the session.
 
-   - ttl is the time to live of the session in seconds
+   - `ttl` is the time to live of the session in seconds.
 
    Plexus will respond with the following:
 
@@ -348,6 +368,43 @@ To create a remote control session, follow these steps:
 1. Open the `.SessionURL` from the create session response in your favorite browser.
 
 1. Click 'connect' on the upper left and the remote control should've started.
+
+### Windows Example
+Let's say your Plexus server is running on `https://plexus.example.com:8443`.
+On the PC of the supporter, open a Powershell and create a support session.
+```powershell
+PS > $Uri = 'https://plexus.example.com:8443/seesion'
+PS > $Form = @{
+      id  = 'my-help-session'
+      ttl  = '3600'
+      username = 'admin'
+      password = 'foobaz'
+}
+PS > $Result = Invoke-RestMethod -Uri $Uri -Method Post -Form $Form
+PS > $Result
+```
+
+You will get a response like this.
+```text
+ID          : my-help-session
+SessionURL  : https://plexus.example.com:8443/session/my-help-session
+AgentMSH    : https://plexus.example.com:8443/config/my-help-session:XyqlM4sYSk5dIjjFRbtu
+AgentConfig : @{ServerID=7B5CE7FDB7F50728580271A7B2093CA1546EC2AC82323CA27124D43ECD8BA0A7F90462A153517F738862F2AB19F1FC9F; 
+              MeshName=plexus/my-help-session/QJROX; MeshType=2; 
+              MeshID=mesh/control/2$V@2QK9XGXKMqqweB68CZQZc$1eTSeVm67mRjbbae91R1A$rk$omiT9SLZzymbi; 
+              MeshIDHex=0xDBF57ED902BD5C65CA32AAB0781EBC09941973FD5E4D27959BAEE64636DB69EF7547503FAE4FE89A24FD48B673CA66E2; MeshServer=wss:
+              //1c663f03-654e-4399-befc-647eeb203848.pub.instances.scw.cloud:8080/agent/my-help-session:XyqlM4sYSk5dIjjFRbtu}
+ExpiresAt   : 2021-09-17T14:35:31.890280097Z
+```
+Point your browser to the `SessionURL`. 
+
+Now transer the URL of the `AgentMSH` to the PC you want to access, open a PowerShell, and execute:
+
+```powershell
+ PS > iwr -Uri https://github.com/Ylianst/MeshCentral/raw/master/agents/MeshService-signed.exe -OutFile meshagent.exe
+ PS > iwr -Uri https://plexus.example.com:8443/config/my-help-session:XyqlM4sYSk5dIjjFRbtu -OutFile meshagent.msh
+ PS > .\meshagent.exe connect
+ ```
 
 ## Development
 
