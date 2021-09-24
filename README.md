@@ -408,15 +408,56 @@ Now transer the URL of the `AgentMSH` to the PC you want to access, open a Power
 
 ## Development
 
-1. Start the development MeshCentral server:
+1. Clone the project
+   ```bash
+   $ git clone https://github.com/cloudradar-monitoring/plexus.git
+   $ cd plexus
+   ```
+
+1. Install and start the development MeshCentral server:
+   *Inside the `dev` folder you will find a suitable meshcentral configuration and some certificates.*
 
    ```bash
    $ (cd dev && npm install)
    $ (cd dev && npm start)
    ```
+   Meshcentral must be running all the time. 
+   Either open a new terminal to start the Plexus server, or stop Meshcetral with CTRL-C and move it to the background.
+   ```bash
+   $ nohup npm start>meshcentral.log 2>&1 &
+   ``` 
+
+   You can log in to the web interface of meshcentral on `http://localhost:8086/control/` using `user=plexus` and `password=plexus`.
 
 1. Start Plexus with the development config:
 
    ```bash
+   $ cd ~/plexus
    $ go run ./cmd/plexus -c plexus.config.development serve
+   ```
+
+1. Check it's working
+   On a new terminal, execute
+   ```bash
+   $ ID=testing
+   $ curl -ks https://localhost:8080/session \
+       -F id=${ID} \
+       -F ttl=3600 \
+       -F username=admin \
+       -F password=foobaz >${ID}.json
+   $ jq < ${ID}.json
+   # Linux
+   $ wget https://raw.githubusercontent.com/Ylianst/MeshCentral/master/agents/meshagent_x86-64 -O meshagent
+   # Mac Intel
+   $ wget https://raw.githubusercontent.com/Ylianst/MeshCentral/master/agents/meshagent_osx-x86-64 -O meshagent
+   $ chmod +x meshagent
+   $ curl -skS $(jq -r .AgentMSH <${ID}.json) -o meshagent.msh
+   $ ./meshagent
+   ```
+
+   You should get a confirmation like
+   ```
+   Connecting to: wss://localhost:8080/agent/testing:K2jWSbTrl7r72jgrMjRg
+   Connected.
+   Server verified meshcore... meshcore already running...
    ```
