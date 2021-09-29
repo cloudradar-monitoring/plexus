@@ -81,6 +81,8 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			MeshType:   2,
 		},
 	}
+	
+	session.SetAgentName()
 	h.sessions[id] = session
 
 	go func() {
