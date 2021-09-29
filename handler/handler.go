@@ -3,7 +3,7 @@ package handler
 import (
 	"sync"
 	"time"
-
+	
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/config"
 )
@@ -28,4 +28,14 @@ type Session struct {
 	AgentConfig        api.AgentConfig
 	ShareURL           string
 	ProxyClose         func()
+}
+
+// SetAgentName sets Session ID as agentName in Session.AgentConfig
+func (s *Session) SetAgentName() {
+	s.AgentConfig.SetAgentName(s.ID)
+}
+
+// GetAgentName returns the agentName from Session.AgentConfig
+func (s Session) GetAgentName() string {
+	return s.AgentConfig.GetAgentName()
 }
