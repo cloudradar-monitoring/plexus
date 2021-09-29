@@ -20,15 +20,10 @@ type AgentConfig struct {
 	MeshID     string
 	MeshIDHex  string
 	MeshServer string
-	agentName  string
+	AgentName  string `json:"agentName"`
 }
 
 // SetAgentName sets the sessionID as agentName in AgentConfig
 func (ac *AgentConfig) SetAgentName(sessionID string) {
-	ac.agentName = strings.ReplaceAll(sessionID, " ", "_")
-}
-
-// GetAgentName returns the agentName
-func (ac AgentConfig) GetAgentName() string {
-	return ac.agentName
+	ac.AgentName = strings.ReplaceAll(sessionID, " ", "_")
 }

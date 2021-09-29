@@ -20,6 +20,7 @@ type Handler struct {
 	lock     sync.RWMutex
 	sessions map[string]*Session
 }
+
 type Session struct {
 	ID                 string
 	Username, Password string
@@ -33,9 +34,4 @@ type Session struct {
 // SetAgentName sets Session ID as agentName in Session.AgentConfig
 func (s *Session) SetAgentName() {
 	s.AgentConfig.SetAgentName(s.ID)
-}
-
-// GetAgentName returns the agentName from Session.AgentConfig
-func (s Session) GetAgentName() string {
-	return s.AgentConfig.GetAgentName()
 }

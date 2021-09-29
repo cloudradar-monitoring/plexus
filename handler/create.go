@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-
+	
 	"github.com/rs/zerolog/log"
-
+	
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/token"
@@ -39,15 +39,15 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		api.WriteBadRequestJSON(rw, fmt.Sprintf("invalid ttl %s: %s", id, err))
 		return
 	}
-
+	
 	h.lock.Lock()
 	defer h.lock.Unlock()
-
+	
 	if _, ok := h.sessions[id]; ok {
 		api.WriteBadRequestJSON(rw, fmt.Sprintf("session with id %s does already exist", id))
 		return
 	}
-
+	
 	mc, err := control.Connect(h.cfg)
 	defer mc.Close()
 	if err != nil {
@@ -65,7 +65,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sessionToken := token.NewAuth()
-
+	
 	session := &Session{
 		Token:     sessionToken,
 		ID:        id,
@@ -84,7 +84,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	
 	session.SetAgentName()
 	h.sessions[id] = session
-
+	
 	go func() {
 		<-time.After(time.Duration(ttl) * time.Second)
 		h.lock.Lock()
@@ -97,7 +97,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}()
-
+	
 	rw.Header().Add("content-type", "application/json")
 	rw.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(rw).Encode(&api.Session{

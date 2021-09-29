@@ -45,5 +45,5 @@ func (h *Handler) GetAgentMsh(rw http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(rw, "MeshType="+strconv.Itoa(session.AgentConfig.MeshType))
 	fmt.Fprintln(rw, "MeshID="+session.AgentConfig.MeshIDHex)
 	fmt.Fprintln(rw, "MeshServer="+session.AgentConfig.MeshServer)
-	fmt.Fprintln(rw, "agentName="+session.GetAgentName())
+	fmt.Fprintln(rw, "agentName="+session.AgentConfig.AgentName)
 }
