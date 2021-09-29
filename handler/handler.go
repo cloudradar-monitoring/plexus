@@ -3,7 +3,7 @@ package handler
 import (
 	"sync"
 	"time"
-	
+
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/config"
 )
