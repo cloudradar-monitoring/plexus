@@ -33,6 +33,9 @@ type Config struct {
 	MeshCentralDomain      string `split_words:"true" default:"control"`
 
 	ExternalHost string `split_words:"true"`
+
+	AuthUser string `split_words:"true"`
+	AuthPass string `split_words:"true"`
 }
 
 func (s *Config) MeshCentralControlURL() string {

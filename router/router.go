@@ -30,7 +30,7 @@ func New(h *handler.Handler) http.Handler {
 	r.Use(middleware.Recoverer)
 	r.Use(accessLog)
 
-	r.Post("/session", h.CreateSession)
+	r.Post("/session", h.SessionCreationAuth(h.CreateSession))
 	r.Get("/session/{id}", h.ShareSession)
 	r.Get("/session/{id}/url", h.ShareSessionURL)
 	r.Delete("/session/{id}", h.DeleteSession)

@@ -249,6 +249,9 @@ Resources
    # The loglevel (one of: debug, info, warn, error)
    PLEXUS_LOG_LEVEL=info
    PLEXUS_LOG_FILE=/var/log/plexus/plexus.log
+   # Plexus auth for creating sessions
+   PLEXUS_AUTH_USER="support"
+   PLEXUS_AUTH_PASSWORD="1234"
    EOF
    ```
 
@@ -319,11 +322,14 @@ To create a remote control session, follow these steps:
 
    ```bash
    $ curl -ks https://localhost:8080/session \
+          -u support:1234 \
           -F id="helping-joe" \
           -F ttl=3600 \
           -F username=admin \
           -F password=foobaz |jq
    ```
+   
+   - The configured credentials `PLEXUS_AUTH_USER` and `PLEXUS_AUTH_PASSWORD` are required when creating a session.
 
    - `username` / `password` is optional and will be asked when opening the session
      inside the browser or deleting the session.
@@ -380,7 +386,10 @@ PS > $Form = @{
       username = 'admin'
       password = 'foobaz'
 }
-PS > $Result = Invoke-RestMethod -Uri $Uri -Method Post -Form $Form
+PS > $Headers = @{
+      Authorization = "Basic [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("support:1234))"
+}
+PS > $Result = Invoke-RestMethod -Uri $Uri -Headers $Headers -Method Post -Form $Form
 PS > $Result
 ```
 
@@ -441,6 +450,7 @@ Now transer the URL of the `AgentMSH` to the PC you want to access, open a Power
    ```bash
    $ ID=testing
    $ curl -ks https://localhost:8080/session \
+       -u support:1234 \
        -F id=${ID} \
        -F ttl=3600 \
        -F username=admin \
