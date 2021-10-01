@@ -1,6 +1,8 @@
 package api
 
-import "time"
+import (
+	"time"
+)
 
 type Session struct {
 	ID          string
@@ -17,4 +19,13 @@ type AgentConfig struct {
 	MeshID     string
 	MeshIDHex  string
 	MeshServer string
+}
+
+type ListSessionsItem struct {
+	ID              string
+	SessionURL      string
+	AgentMSH        string
+	SessionUsername string `json:",omitempty"`
+	SessionPassword string `json:",omitempty"`
+	ExpiresAt       time.Time
 }

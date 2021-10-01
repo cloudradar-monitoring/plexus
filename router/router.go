@@ -31,6 +31,7 @@ func New(h *handler.Handler) http.Handler {
 	r.Use(accessLog)
 
 	r.Post("/session", h.SessionCreationAuth(h.CreateSession))
+	r.Get("/session", h.SessionCreationAuth(h.ListSessions))
 	r.Get("/session/{id}", h.ShareSession)
 	r.Get("/session/{id}/url", h.ShareSessionURL)
 	r.Delete("/session/{id}", h.DeleteSession)
