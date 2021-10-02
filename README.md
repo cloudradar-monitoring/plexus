@@ -251,7 +251,7 @@ Resources
    PLEXUS_LOG_FILE=/var/log/plexus/plexus.log
    # Plexus auth for creating sessions
    PLEXUS_AUTH_USER="support"
-   PLEXUS_AUTH_PASSWORD="1234"
+   PLEXUS_AUTH_PASS="1234"
    EOF
    ```
 
@@ -329,7 +329,7 @@ To create a remote control session, follow these steps:
           -F password=foobaz |jq
    ```
    
-   - The configured credentials `PLEXUS_AUTH_USER` and `PLEXUS_AUTH_PASSWORD` are required when creating a session.
+   - The configured credentials `PLEXUS_AUTH_USER` and `PLEXUS_AUTH_PASS` are required when creating a session.
 
    - `username` / `password` is optional and will be asked when opening the session
      inside the browser or deleting the session.
