@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
+	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
@@ -83,8 +86,27 @@ var serve = &cli.Command{
 		mc.Close()
 
 		h := handler.New(&cfg)
-		r := router.New(h)
+
+		r := mux.NewRouter()
+		r.Use(accessLog)
+		router.Register(r, h)
+
 		log.Info().Str("addr", cfg.ServerAddress).Msg("Start listening")
 		return server.Start(r, cfg.ServerAddress, cfg.TLSCertFile, cfg.TLSKeyFile)
 	},
+}
+
+func accessLog(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		h.ServeHTTP(rw, r)
+		duration := time.Since(start)
+
+		log.Debug().
+			Str("host", r.Host).
+			Str("ip", r.RemoteAddr).
+			Str("path", r.URL.Path).
+			Str("duration", duration.String()).
+			Msg("HTTP")
+	})
 }

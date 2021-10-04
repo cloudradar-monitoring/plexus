@@ -6,14 +6,14 @@ import (
 	"net/http/httputil"
 	"strings"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/mux"
 	"github.com/rs/zerolog/log"
 
 	"github.com/cloudradar-monitoring/plexus/proxy"
 )
 
 func (h *Handler) ProxyMeshCentralURL() string {
-	return fmt.Sprintf("/%s/*", h.cfg.MeshCentralDomain)
+	return fmt.Sprintf("/%s/", h.cfg.MeshCentralDomain)
 }
 func (h *Handler) ProxyMeshCentral() http.Handler {
 	director := func(req *http.Request) {
@@ -53,8 +53,9 @@ func (h *Handler) ProxyRelay(rw http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} string
 // @Router /agent/{id}:{token} [get]
 func (h *Handler) ProxyAgent(rw http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	token := chi.URLParam(r, "token")
+	vars := mux.Vars(r)
+	id := vars["id"]
+	token := vars["token"]
 
 	h.lock.Lock()
 	defer h.lock.Unlock()

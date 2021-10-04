@@ -2,11 +2,8 @@ package router
 
 import (
 	"net/http"
-	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/rs/zerolog/log"
+	"github.com/gorilla/mux"
 
 	"github.com/cloudradar-monitoring/plexus/handler"
 )
@@ -25,33 +22,15 @@ import (
 // @BasePath /
 
 // @securityDefinitions.basic BasicAuth
-func New(h *handler.Handler) http.Handler {
-	r := chi.NewRouter()
-	r.Use(middleware.Recoverer)
-	r.Use(accessLog)
 
-	r.Post("/session", h.SessionCreationAuth(h.CreateSession))
-	r.Get("/session", h.SessionCreationAuth(h.ListSessions))
-	r.Get("/session/{id}", h.ShareSession)
-	r.Get("/session/{id}/url", h.ShareSessionURL)
-	r.Delete("/session/{id}", h.DeleteSession)
-	r.Get("/config/{id}:{token}", h.GetAgentMsh)
-	r.Get("/agent/{id}:{token}", h.ProxyAgent)
-	r.Get("/meshrelay.ashx", h.ProxyRelay)
-	r.Handle(h.ProxyMeshCentralURL(), h.ProxyMeshCentral())
-	return r
-}
-func accessLog(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		h.ServeHTTP(rw, r)
-		duration := time.Since(start)
-
-		log.Debug().
-			Str("host", r.Host).
-			Str("ip", r.RemoteAddr).
-			Str("path", r.URL.Path).
-			Str("duration", duration.String()).
-			Msg("HTTP")
-	})
+func Register(r *mux.Router, h *handler.Handler) {
+	r.HandleFunc("/session", h.SessionCreationAuth(h.CreateSession)).Methods(http.MethodPost)
+	r.HandleFunc("/session", h.SessionCreationAuth(h.ListSessions)).Methods(http.MethodGet)
+	r.HandleFunc("/session/{id}", h.ShareSession).Methods(http.MethodGet)
+	r.HandleFunc("/session/{id}/url", h.ShareSessionURL).Methods(http.MethodGet)
+	r.HandleFunc("/session/{id}", h.DeleteSession).Methods(http.MethodDelete)
+	r.HandleFunc("/config/{id}:{token}", h.GetAgentMsh).Methods(http.MethodGet)
+	r.HandleFunc("/agent/{id}:{token}", h.ProxyAgent).Methods(http.MethodGet)
+	r.HandleFunc("/meshrelay.ashx", h.ProxyRelay).Methods(http.MethodGet)
+	r.PathPrefix(h.ProxyMeshCentralURL()).Handler(h.ProxyMeshCentral())
 }

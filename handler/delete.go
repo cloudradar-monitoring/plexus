@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/mux"
 
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
@@ -21,7 +21,7 @@ import (
 // @Failure 502 {object} api.Error
 // @Router /session/{id} [delete]
 func (h *Handler) DeleteSession(rw http.ResponseWriter, r *http.Request) {
-	session, ok := h.basicAuth(rw, r, chi.URLParam(r, "id"))
+	session, ok := h.basicAuth(rw, r, mux.Vars(r)["id"])
 	if !ok {
 		return
 	}
