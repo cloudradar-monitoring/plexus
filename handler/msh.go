@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/mux"
 
 	"github.com/cloudradar-monitoring/plexus/api"
 )
@@ -23,8 +23,9 @@ import (
 // @Failure 500 {object} string
 // @Router /config/{id}:{token} [get]
 func (h *Handler) GetAgentMsh(rw http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	token := chi.URLParam(r, "token")
+	vars := mux.Vars(r)
+	id := vars["id"]
+	token := vars["token"]
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
