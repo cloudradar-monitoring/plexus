@@ -1,16 +1,23 @@
 package proxy
 
 import (
-	"context"
 	"io"
 	"net/http"
+	"time"
 
-	"github.com/gobwas/ws"
+	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
 )
 
+var Upgrader = websocket.Upgrader{
+	HandshakeTimeout: 10 * time.Second,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
 func Hold(rw http.ResponseWriter, r *http.Request) {
-	agentConn, _, _, err := ws.UpgradeHTTP(r, rw)
+	agentConn, err := Upgrader.Upgrade(rw, r, nil)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		_, _ = io.WriteString(rw, "upgrade failed "+err.Error())
@@ -19,19 +26,25 @@ func Hold(rw http.ResponseWriter, r *http.Request) {
 	}
 	go func() {
 		defer agentConn.Close()
-		_, _ = io.Copy(io.Discard, agentConn)
+		for {
+			// ignore messages
+			_, _, err := agentConn.ReadMessage()
+			if err != nil {
+				break
+			}
+		}
 	}()
 }
 
 func Proxy(rw http.ResponseWriter, r *http.Request, target string) (func(), bool) {
-	agentConn, _, _, err := ws.UpgradeHTTP(r, rw)
+	agentConn, err := Upgrader.Upgrade(rw, r, nil)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		_, _ = io.WriteString(rw, "upgrade failed "+err.Error())
 		log.Info().Err(err).Msg("Proxy: upgrade failed")
 		return nil, false
 	}
-	serverConn, _, _, err := ws.Dialer{}.Dial(context.Background(), target)
+	serverConn, _, err := websocket.DefaultDialer.Dial(target, nil)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadGateway)
 		_, _ = io.WriteString(rw, "could not reach meshcentral server "+err.Error())
@@ -46,11 +59,29 @@ func Proxy(rw http.ResponseWriter, r *http.Request, target string) (func(), bool
 
 	go func() {
 		defer closeAll()
-		_, _ = io.Copy(agentConn, serverConn)
+		for {
+			t, msg, err := agentConn.ReadMessage()
+			if err != nil {
+				break
+			}
+			err = serverConn.WriteMessage(t, msg)
+			if err != nil {
+				break
+			}
+		}
 	}()
 	go func() {
 		defer closeAll()
-		_, _ = io.Copy(serverConn, agentConn)
+		for {
+			t, msg, err := serverConn.ReadMessage()
+			if err != nil {
+				break
+			}
+			err = agentConn.WriteMessage(t, msg)
+			if err != nil {
+				break
+			}
+		}
 	}()
 	return closeAll, true
 }
