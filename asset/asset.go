@@ -5,7 +5,12 @@ import (
 	"text/template"
 )
 
-//go:embed *.html
+//go:embed share.html
 var files embed.FS
 
-var ShareTemplate = template.Must(template.ParseFS(files, "share.html"))
+//go:embed index.html
+var IndexHTML []byte
+
+var (
+	ShareTemplate = template.Must(template.ParseFS(files, "share.html"))
+)

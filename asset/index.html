@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+
+    <title>Plexus</title>
+
+    <!-- Font Awesome -->
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+            rel="stylesheet"
+    />
+    <!-- Google Fonts -->
+    <link
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+            rel="stylesheet"
+    />
+    <!-- MDB -->
+    <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css"
+            rel="stylesheet"
+    />
+
+    <!-- MDB -->
+    <script
+            type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"
+    ></script>
+
+    <style>
+        textarea {
+            resize: none;
+        }
+
+        .text-box {
+            margin: 0 0 1rem 0;
+            min-width: 480px;
+        }
+
+        .text-container {
+            margin: 0 0 1rem 0;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .text-container .text-icon {
+            position: absolute;
+            bottom: 2%;
+            right: 0.5%;
+        }
+
+        .label-on-border {
+            position: absolute;
+            top: -1rem;
+            padding: 0 5px;
+            background: white;
+        }
+
+        .div-border {
+            border: 1px solid;
+            padding: 1rem;
+            border-radius: 5px;
+        }
+
+        .fa-copy {
+            cursor: pointer;
+        }
+
+    </style>
+
+    <script>
+        function copy(id) {
+            navigator.clipboard.writeText(document.getElementById(id).value);
+        }
+
+        function clearHTML(id) {
+            document.getElementById(id).innerHTML = '';
+        }
+
+        function getSession(id, agentMSH, sessionURL) {
+            let sessionDetails = document.getElementById('session-details')
+            sessionDetails.innerHTML = `<h2 class="mt-5 mb-3">Session details</h2>
+                        <div class="form-outline  mb-4 div-border">
+                            <label class="label-on-border">For the supporter</label>
+                            <div class="row">
+                                <div class="col-9"></div>
+                                <div class="col-3">
+                                    <button type="submit" class="btn btn-primary btn-block" onclick="window.open('${sessionURL}')">Open session</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-outline div-border mt-3">
+                            <label class="label-on-border">On the remote site</label>
+                            <div class="md-2">
+                                <label class="mt-1">Download a meshagent configuration from</label>
+                                <div class="form-outline">
+                                    <div class="text-box">
+                                        <div class="text-container">
+                                            <span class="text-icon">
+                                                <i class="far fa-copy" onclick="copy('session-config')"></i>
+                                            </span>
+                                            <textarea class="form-control" id="session-config" rows="1" readonly>${agentMSH}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label>Start the session on Windows from the PowerShell</label>
+                                <div>
+                                    <div>
+                                        <div class="text-box">
+                                            <div class="text-container">
+                                                <span class="text-icon">
+                                                    <i class="far fa-copy" onclick="copy('windows-session')"></i>
+                                                </span>
+                                                <textarea class="form-control" id="windows-session" rows="3" readonly>
+wr -Uri https://github.com/Ylianst/MeshCentral/raw/master/agents/MeshService-signed.exe -OutFile meshagent.exe
+iwr -Uri ${agentMSH} -OutFile meshagent.msh
+.\\meshagent.exe connect</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="label-on-border">Start the session on Linux from the Terminal</label>
+                                <div class="text-box">
+                                    <div class="text-container">
+                                        <span class="text-icon">
+                                            <i class="far fa-copy" onclick="copy('linux-session')"></i>
+                                        </span>
+                                        <textarea class="form-control" id="linux-session" rows="4" readonly>
+curl https://raw.githubusercontent.com/Ylianst/MeshCentral/master/agents/meshagent_x86-64 -O meshagent
+chmod +x meshagent.msh
+curl ${agentMSH} -OutFile meshagent.msh
+.\\meshagent connect</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                         </div>`;
+            sessionDetails.setAttribute('class', id);
+        }
+
+        function deleteSession(id) {
+            if (confirm('Are you sure you want to delete session ' + id + '?')) {
+                const deleteUrl = '/session/' + id;
+                fetch(deleteUrl, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-type': 'application/json'
+                    }
+                }).then((response) => response.json())
+                    .then((data) => {
+                        document.getElementById(id).remove();
+                        let activeSessions = document.getElementById('active-sessions');
+                        let sessionDetails = document.getElementById('session-details');
+                        if (sessionDetails.getAttribute('class') === id) {
+                            sessionDetails.innerHTML = '';
+                        }
+                        if (activeSessions.children.length <= 0) {
+                            activeSessions.innerHTML = '<div class="row">No active sessions</div';
+                        }
+                    }).catch(error => alert(error));
+            }
+        }
+
+        function createSession() {
+            const createUrl = '/session'
+            const formData = new URLSearchParams();
+            formData.append("id", document.getElementById('sessionid').value)
+            formData.append("ttl", document.getElementById('ttl').value)
+            formData.append("username", document.getElementById('username').value)
+            formData.append("password", document.getElementById('password').value)
+            fetch(createUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData,
+            }).then((response) => response.json()).then((data) => {
+                if (data.Error !==undefined) {
+                    alert(data.Description)
+                    return
+                }
+                document.getElementById('created-session').innerHTML =
+                    `<h2 class="mt-4 mb-3">
+                                   Session created
+                                </h2>
+                                <div class="form-outline mb-4 div-border">
+                                   <label class="label-on-border">
+                                       For the supporter
+                                   </label>
+                                   <div class="row">
+                                       <div class="col-9"></div>
+                                       <div class="col-3">
+                                           <button type="submit" class="btn btn-primary btn-block" onclick="window.open('${data.SessionURL}')">
+                                               Open session
+                                           </button>
+                                       </div>
+                                   </div>
+                                </div>
+                                <div class="form-outline div-border mt-3">
+                                   <label class="label-on-border">
+                                       On the remote site
+                                   </label>
+                                   <div class="form-outline">
+                                       <label class="mt-1">
+                                           Download a meshagent configuration from
+                                       </label>
+                                       <div class="form-outline">
+                                           <div class="text-box">
+                                               <div class="text-container">
+                                                   <span class="text-icon">
+                                                       <i class="far fa-copy" onclick="copy('created-session-config')"></i>
+                                                   </span>
+                                                   <textarea class="form-control" id="created-session-config" rows="1" readonly>${data.AgentMSH}</textarea>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   <div>
+                                   <label>
+                                       Start the session on Windows from the PowerShell
+                                   </label>
+                                   <div>
+                                       <div>
+                                           <div class="text-box">
+                                               <div class="text-container">
+                                                   <span class="text-icon">
+                                                       <i class="far fa-copy" onclick="copy('created-windows-session')"></i>
+                                                   </span>
+                                                   <textarea class="form-control" id="created-windows-session" rows="3" readonly>
+   wr -Uri https://github.com/Ylianst/MeshCentral/raw/master/agents/MeshService-signed.exe -OutFile meshagent.exe
+   iwr -Uri ${data.AgentMSH} -OutFile meshagent.msh
+   .\\meshagent.exe connect</textarea>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </div>
+                                </div>
+                                <div>
+                                   <label>
+                                       Start the session on Linux from the Terminal
+                                   </label>
+                                   <div class="text-box">
+                                       <div class="text-container">
+                                           <span class="text-icon">
+                                               <i class="far fa-copy" onclick="copy('created-linux-session')"></i>
+                                           </span>
+                                           <textarea class="form-control" id="created-linux-session" rows="4" readonly>
+   curl https://raw.githubusercontent.com/Ylianst/MeshCentral/master/agents/meshagent_x86-64 -O meshagent
+   chmod +x meshagent.msh
+   curl ${data.AgentMSH} -OutFile meshagent.msh
+   .\\meshagent connect</textarea>
+                                       </div>
+                                   </div>
+                                </div>`
+            })
+                .catch(error => alert(error));
+        }
+
+        function getSessions() {
+            const deleteUrl = '/session';
+            fetch(deleteUrl, {
+                method: 'GET',
+                headers: {
+                    //"Authorization": "Basic " + btoa(username + ":" + password)
+                    'Content-Type': 'application/json'
+                },
+            }).then((response) => response.json())
+                .then((data) => {
+                    let activeSessions = document.getElementById('active-sessions');
+                    activeSessions.innerHTML = ''
+                    if (data.length <= 0) {
+                        activeSessions.innerHTML = '<div class="row">No active sessions</div'
+                        return
+                    }
+                    data.forEach(function (r) {
+                        activeSessions.innerHTML +=
+                            `<div id="${r.ID}" class="row">
+                               <div class="col-7">
+                                   ${r.ID}
+                               </div>
+                               <div  class="col-1">
+                                   <a href="#" onclick="deleteSession('${r.ID}')">
+                                       Delete
+                                   </a>
+                               </div>
+                               <div  class="col-2">
+                                   <a href="#" onclick="getSession('${r.ID}', '${r.AgentMSH}', '${r.SessionURL}')">
+                                       View Details
+                                   </a>
+                               </div>
+                               <div  class="col-2">
+                                   <a href="${r.SessionURL}" target="_blank">
+                                       Open Supporter Window
+                                   </a>
+                               </div>
+                           </div>`
+                    });
+                }).catch(error => alert(error));
+        }
+    </script>
+</head>
+
+<body>
+<div class="container">
+    <!-- Links -->
+    <!-- Tabs navs -->
+    <div class="row">
+        <div class="col-9">
+            <ul class="nav nav-tabs mb-3" id="tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="new-tab" data-mdb-toggle="tab" href="#new-content" role="tab"
+                       onclick="clearHTML('session-details')" aria-controls="new-content" aria-selected="true">Create
+                        new</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="sessions-tab" data-mdb-toggle="tab" href="#sessions-content" role="tab"
+                       aria-controls="sessions-content" aria-selected="false"
+                       onclick="clearHTML('created-session'); getSessions()">Sessions</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-3">
+            <ul class="nav nav-tabs justify-content-end mb-3" id="links" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="btn btn-primary" style="background-color: #333333;"
+                       href="https://github.com/cloudradar-monitoring/plexus" role="button" target="_blank"
+                    ><i class="fab fa-github fa-lg"></i> Plexus on GitHub</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Tabs content -->
+        <div class="tab-content row" id="content">
+            <div class="tab-pane fade show active" id="new-content" role="tabpanel" aria-labelledby="new-tab">
+                <h2>Create a new support session</h2>
+                <form class="mt-3" id="create-form">
+                    <!-- Mandatory fields -->
+                    <div class="form-outline mb-4 div-border">
+                        <label class="label-on-border">Base settings (mandatory)</label>
+                        <div class="form-outline mb-4">
+                            <input type="text" id="sessionid" class="form-control" required/>
+                            <label class="form-label" for="sessionid">Session ID</label>
+                        </div>
+
+                        <div class="form-outline">
+                            <input type="number" id="ttl" class="form-control" required/>
+                            <label class="form-label" for="ttl">TTL (sec)</label>
+                        </div>
+                    </div>
+                    <!-- Recommended fields -->
+                    <div class="form-outline mb-4 div-border">
+                        <label class="label-on-border">Password protection (reccomended)</label>
+                        <div class="form-outline mb-4">
+                            <input type="text" id="username" class="form-control"/>
+                            <label class="form-label" for="Username">Username</label>
+                        </div>
+                        <div class="form-outline">
+                            <input type="password" id="password" class="form-control"/>
+                            <label class="form-label" for="password">Password</label>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-block" id="create" onclick="createSession()">
+                        Create session
+                    </button>
+                </form>
+                <div id="created-session">
+
+                </div>
+            </div>
+            <div class="tab-pane fade form-outline" id="sessions-content" role="tabpanel"
+                 aria-labelledby="sessions-tab">
+                <h2>Active sessions</h2>
+                <div id="active-sessions" class="form-control">
+
+                </div>
+                <div id="session-details" class="0">
+
+                </div>
+            </div>
+        </div>
+        <!-- Tabs content -->
+    </div>
+</div>
+
+</footer>
+</body>
+
+</html>

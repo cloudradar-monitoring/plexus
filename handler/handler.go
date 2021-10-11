@@ -37,6 +37,7 @@ func Register(r *mux.Router, opt *Options) {
 		sessions:           make(map[string]*Session),
 	}
 	plexus := r.PathPrefix(opt.Prefix).Subrouter()
+	plexus.HandleFunc("/", h.Home).Methods(http.MethodGet)
 	plexus.HandleFunc("/session", h.CreateSession).Methods(http.MethodPost)
 	plexus.HandleFunc("/session", h.ListSessions).Methods(http.MethodGet)
 	plexus.HandleFunc("/session/{id}", h.ShareSession).Methods(http.MethodGet)
