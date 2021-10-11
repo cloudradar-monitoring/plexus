@@ -121,6 +121,7 @@ func accessLog(h http.Handler) http.Handler {
 		log.Debug().
 			Str("host", r.Host).
 			Str("ip", r.RemoteAddr).
+			Str("method", r.Method).
 			Str("path", r.URL.Path).
 			Str("duration", duration.String()).
 			Msg("HTTP")
