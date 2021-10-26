@@ -11,6 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
+	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/config"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/handler"
@@ -59,7 +60,6 @@ var serve = &cli.Command{
 			return err
 		}
 		defer handle.Close()
-
 		exit := false
 		for _, err := range errs {
 			log.WithLevel(err.Level).Msg(err.Msg)
@@ -70,7 +70,7 @@ var serve = &cli.Command{
 		}
 		log.Debug().Interface("config", cfg).Msg("Using")
 
-		mc, err := control.Connect(&cfg, zerologger.Get())
+		mc, err := control.Connect(cfg.AsControlConfig(), zerologger.Get())
 		if err != nil {
 			return fmt.Errorf("could not connect to meshcentral: %s", err)
 		}
@@ -85,7 +85,19 @@ var serve = &cli.Command{
 		}
 		mc.Close()
 
-		h := handler.New(&cfg, zerologger.Get())
+		var auth handler.AuthChecker = func(rw http.ResponseWriter, r *http.Request) bool {
+			user, password, _ := r.BasicAuth()
+			if cfg.AuthUser != "" || cfg.AuthPass != "" {
+				if cfg.AuthUser != user || cfg.AuthPass != password {
+					rw.Header().Add("WWW-Authenticate", `Basic realm="Plexus Session", charset="UTF-8"`)
+					api.WriteJSONError(rw, http.StatusUnauthorized, "invalid username / password")
+					return false
+				}
+			}
+			return true
+		}
+
+		h := handler.New(cfg.AsControlConfig(), zerologger.Get(), auth)
 
 		r := mux.NewRouter()
 		r.Use(accessLog)

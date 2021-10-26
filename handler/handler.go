@@ -1,17 +1,21 @@
 package handler
 
 import (
+	"net/http"
 	"sync"
 	"time"
 
 	"github.com/cloudradar-monitoring/plexus/api"
-	"github.com/cloudradar-monitoring/plexus/config"
+	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/logger"
 )
 
-func New(cfg *config.Config, log logger.Logger) *Handler {
+type AuthChecker func(rw http.ResponseWriter, r *http.Request) bool
+
+func New(cfg *control.Config, log logger.Logger, auth AuthChecker) *Handler {
 	return &Handler{
 		log:      log,
+		auth:     auth,
 		cfg:      cfg,
 		sessions: make(map[string]*Session),
 	}
@@ -19,7 +23,8 @@ func New(cfg *config.Config, log logger.Logger) *Handler {
 
 type Handler struct {
 	log      logger.Logger
-	cfg      *config.Config
+	cfg      *control.Config
+	auth     AuthChecker
 	lock     sync.RWMutex
 	sessions map[string]*Session
 }

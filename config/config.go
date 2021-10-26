@@ -9,6 +9,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog"
+
+	"github.com/cloudradar-monitoring/plexus/control"
 )
 
 var (
@@ -36,6 +38,16 @@ type Config struct {
 
 	AuthUser string `split_words:"true"`
 	AuthPass string `split_words:"true"`
+}
+
+func (s *Config) AsControlConfig() *control.Config {
+	return &control.Config{
+		MeshCentralURL:         s.MeshCentralURLParsed,
+		MeshCentralUser:        s.MeshCentralUser,
+		MeshCentralPass:        s.MeshCentralPass,
+		MeshCentralDomain:      s.MeshCentralDomain,
+		MeshCentralGroupPrefix: s.MeshCentralGroupPrefix,
+	}
 }
 
 func (s *Config) MeshCentralControlURL() string {
