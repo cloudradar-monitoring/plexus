@@ -97,7 +97,11 @@ var serve = &cli.Command{
 			return true
 		}
 
-		h := handler.New(cfg.AsControlConfig(), zerologger.Get(), auth)
+		h := handler.New(&handler.Options{
+			Config:                  cfg.AsControlConfig(),
+			Auth:                    auth,
+			Log:                     zerologger.Get(),
+			AllowSessionCredentials: true})
 
 		r := mux.NewRouter()
 		r.Use(accessLog)

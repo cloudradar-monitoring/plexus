@@ -7,7 +7,7 @@ import (
 	"github.com/cloudradar-monitoring/plexus/api"
 )
 
-func (h *Handler) basicAuth(rw http.ResponseWriter, r *http.Request, id string) (*Session, bool) {
+func (h *Handler) checkSessionAuthentication(rw http.ResponseWriter, r *http.Request, id string) (*Session, bool) {
 	user, password, _ := r.BasicAuth()
 	session, ok := h.sessions[id]
 	if !ok {
@@ -15,21 +15,11 @@ func (h *Handler) basicAuth(rw http.ResponseWriter, r *http.Request, id string) 
 		return nil, false
 	}
 
-	if session.Username != "" || session.Password != "" {
-		if session.Username != user || session.Password != password {
-			rw.Header().Add("WWW-Authenticate", `Basic realm="Plexus Session", charset="UTF-8"`)
-			api.WriteJSONError(rw, http.StatusUnauthorized, "invalid username / password")
-			return nil, false
+	if h.sessionCredentials {
+		if session.Username == user && session.Password == password {
+			return session, true
 		}
 	}
-	return session, true
-}
 
-// SessionCreationAuth is middleware authenticating create session requests
-func (h *Handler) SessionCreationAuth(next http.HandlerFunc) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		if h.auth(rw, r) {
-			next.ServeHTTP(rw, r)
-		}
-	}
+	return session, h.auth(rw, r)
 }

@@ -12,21 +12,30 @@ import (
 
 type AuthChecker func(rw http.ResponseWriter, r *http.Request) bool
 
-func New(cfg *control.Config, log logger.Logger, auth AuthChecker) *Handler {
+type Options struct {
+	Config                  *control.Config
+	Log                     logger.Logger
+	Auth                    AuthChecker
+	AllowSessionCredentials bool
+}
+
+func New(opt *Options) *Handler {
 	return &Handler{
-		log:      log,
-		auth:     auth,
-		cfg:      cfg,
-		sessions: make(map[string]*Session),
+		log:                opt.Log,
+		auth:               opt.Auth,
+		cfg:                opt.Config,
+		sessionCredentials: opt.AllowSessionCredentials,
+		sessions:           make(map[string]*Session),
 	}
 }
 
 type Handler struct {
-	log      logger.Logger
-	cfg      *control.Config
-	auth     AuthChecker
-	lock     sync.RWMutex
-	sessions map[string]*Session
+	log                logger.Logger
+	cfg                *control.Config
+	auth               AuthChecker
+	lock               sync.RWMutex
+	sessionCredentials bool
+	sessions           map[string]*Session
 }
 type Session struct {
 	ID                 string

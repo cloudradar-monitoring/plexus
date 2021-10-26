@@ -27,7 +27,7 @@ func (h *Handler) ShareSession(rw http.ResponseWriter, r *http.Request) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
-	session, ok := h.basicAuth(rw, r, mux.Vars(r)["id"])
+	session, ok := h.checkSessionAuthentication(rw, r, mux.Vars(r)["id"])
 	if !ok {
 		return
 	}
@@ -55,7 +55,7 @@ func (h *Handler) ShareSessionURL(rw http.ResponseWriter, r *http.Request) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
-	session, ok := h.basicAuth(rw, r, mux.Vars(r)["id"])
+	session, ok := h.checkSessionAuthentication(rw, r, mux.Vars(r)["id"])
 	if !ok {
 		return
 	}

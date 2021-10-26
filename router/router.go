@@ -24,8 +24,8 @@ import (
 // @securityDefinitions.basic BasicAuth
 
 func Register(r *mux.Router, h *handler.Handler) {
-	r.HandleFunc("/session", h.SessionCreationAuth(h.CreateSession)).Methods(http.MethodPost)
-	r.HandleFunc("/session", h.SessionCreationAuth(h.ListSessions)).Methods(http.MethodGet)
+	r.HandleFunc("/session", h.CreateSession).Methods(http.MethodPost)
+	r.HandleFunc("/session", h.ListSessions).Methods(http.MethodGet)
 	r.HandleFunc("/session/{id}", h.ShareSession).Methods(http.MethodGet)
 	r.HandleFunc("/session/{id}/url", h.ShareSessionURL).Methods(http.MethodGet)
 	r.HandleFunc("/session/{id}", h.DeleteSession).Methods(http.MethodDelete)
