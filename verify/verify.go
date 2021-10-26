@@ -13,12 +13,12 @@ import (
 
 	"github.com/cloudradar-monitoring/plexus/config"
 	"github.com/cloudradar-monitoring/plexus/control"
-	"github.com/cloudradar-monitoring/plexus/logger"
+	"github.com/cloudradar-monitoring/plexus/logger/zerologger"
 )
 
 func Verify(configFile string) bool {
 	cfg, errs := config.Get(configFile)
-	_, _ = logger.Init(zerolog.Disabled, "")
+	_, _ = zerologger.Init(zerolog.Disabled, "")
 
 	fmt.Print("Config: ")
 	for _, err := range errs {
@@ -31,7 +31,7 @@ func Verify(configFile string) bool {
 	fmt.Println("Ok!")
 
 	fmt.Print("MeshCentral Server: ")
-	mc, err := control.Connect(&cfg)
+	mc, err := control.Connect(&cfg, zerologger.Get())
 	if err != nil {
 		fmt.Println("Error")
 		fmt.Println(">", err)

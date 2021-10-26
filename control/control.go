@@ -11,15 +11,16 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/rs/zerolog/log"
 
 	"github.com/cloudradar-monitoring/plexus/config"
+	"github.com/cloudradar-monitoring/plexus/logger"
 )
 
 const GetTimeout = 5 * time.Second
 
-func Connect(cfg *config.Config) (*MeshCentral, error) {
+func Connect(cfg *config.Config, log logger.Logger) (*MeshCentral, error) {
 	mc := &MeshCentral{
+		log:            log,
 		pendingActions: make(map[string]Payload),
 		waitFor:        make(map[string]chan<- Payload),
 		dead:           make(chan error, 1),
@@ -31,6 +32,7 @@ func Connect(cfg *config.Config) (*MeshCentral, error) {
 }
 
 type MeshCentral struct {
+	log            logger.Logger
 	mutex          sync.Mutex
 	pendingActions map[string]Payload
 	waitFor        map[string]chan<- Payload
@@ -40,7 +42,7 @@ type MeshCentral struct {
 }
 
 func (m *MeshCentral) Close() {
-	log.Debug().Msg("MeshControl: Disconnect")
+	m.log.Debugf("MeshControl: Disconnect")
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 	if m.conn != nil {
@@ -56,10 +58,10 @@ func (m *MeshCentral) connect() error {
 		"x-meshauth": []string{auth},
 	})
 	if err != nil {
-		log.Error().Err(err).Msg("MeshControl: Connect")
+		m.log.Errorf("MeshControl: Connect: %s", err)
 		return fmt.Errorf("could not connect to control server: %s", err)
 	}
-	log.Debug().Msg("MeshControl: Connected")
+	m.log.Debugf("MeshControl: Connected")
 	m.conn = conn
 
 	go func() {
@@ -70,16 +72,17 @@ func (m *MeshCentral) connect() error {
 					return
 				}
 				if errors.Is(err, net.ErrClosed) {
-					log.Trace().Err(err).Interface("body", &payload).Msg("Control Read")
+					m.log.Debugf("Control Read: %s", err)
 				} else {
-					log.Warn().Err(err).Interface("body", &payload).Msg("Control Read")
+					m.log.Infof("Control Read: %s", err)
 				}
 				m.dead <- err
 				return
 			}
 
 			action := payload.Action()
-			log.Debug().Interface("payload", payload).Msg("Control Read")
+
+			m.log.Debugf("Control Read: %#v", &payload)
 
 			func() {
 				m.mutex.Lock()
@@ -143,6 +146,6 @@ func (m *MeshCentral) Send(payload map[string]interface{}) error {
 		return err
 	default:
 	}
-	log.Debug().Interface("payload", payload).Msg("Control Write")
+	m.log.Debugf("Control Write: %#v", payload)
 	return m.conn.WriteJSON(&payload)
 }
