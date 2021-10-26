@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/zerolog/log"
 
 	"github.com/cloudradar-monitoring/plexus/proxy"
 )
@@ -36,12 +35,10 @@ func (h *Handler) ProxyMeshCentral() http.Handler {
 // @Success 200 {object} string
 // @Router /meshrelay.ashx [get]
 func (h *Handler) ProxyRelay(rw http.ResponseWriter, r *http.Request) {
-	log.Info().Interface("headers", r.Header).Msg("Proxy Relay")
-
 	proxyURL := fmt.Sprintf("%s?%s", h.cfg.MeshRelayURL(), r.URL.RawQuery)
-	_, ok := proxy.Proxy(rw, r, proxyURL)
+	_, ok := proxy.Proxy(h.log, rw, r, proxyURL)
 	if ok {
-		log.Debug().Str("url", r.URL.String()).Msg("MeshRelay Connected")
+		h.log.Debugf("MeshRelay Connected: %s", r.URL.String())
 	}
 }
 
@@ -61,11 +58,11 @@ func (h *Handler) ProxyAgent(rw http.ResponseWriter, r *http.Request) {
 	defer h.lock.Unlock()
 	session, ok := h.sessions[id]
 	if !ok || session.Token != token {
-		proxy.Hold(rw, r)
+		proxy.Hold(h.log, rw, r)
 		return
 	}
 
-	agentClose, ok := proxy.Proxy(rw, r, h.cfg.MeshCentralAgentURL())
+	agentClose, ok := proxy.Proxy(h.log, rw, r, h.cfg.MeshCentralAgentURL())
 	if ok {
 		session.ProxyClose = agentClose
 	}

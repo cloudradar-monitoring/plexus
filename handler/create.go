@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/rs/zerolog/log"
-
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/token"
@@ -48,7 +46,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mc, err := control.Connect(h.cfg)
+	mc, err := control.Connect(h.cfg, h.log)
 	defer mc.Close()
 	if err != nil {
 		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not connect to mesh control: %s", err))
@@ -88,10 +86,10 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		h.lock.Lock()
 		defer h.lock.Unlock()
 		if s, ok := h.sessions[id]; ok {
-			log.Info().Str("id", id).Msg("Session Expired")
+			h.log.Infof("Session %s expired", id)
 			err := h.deleteInternal(s)
 			if err != nil {
-				log.Err(err).Str("id", id).Msg("Could not clean session")
+				h.log.Errorf("Could not clean session %s: %s", id, err)
 			}
 		}
 	}()

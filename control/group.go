@@ -3,8 +3,6 @@ package control
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/rs/zerolog/log"
 )
 
 type CreatedMesh struct {
@@ -36,7 +34,7 @@ func (m *MeshCentral) CreateMesh(name string) (*CreatedMesh, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Debug().Str("name", name).Msg("MeshControl: Created Mesh")
+	m.log.Debugf("MeshControl: Created Mesh %s", name)
 	return &CreatedMesh{
 		Name:  name,
 		IDHex: hexID,

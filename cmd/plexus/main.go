@@ -14,7 +14,7 @@ import (
 	"github.com/cloudradar-monitoring/plexus/config"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/handler"
-	"github.com/cloudradar-monitoring/plexus/logger"
+	"github.com/cloudradar-monitoring/plexus/logger/zerologger"
 	"github.com/cloudradar-monitoring/plexus/router"
 	"github.com/cloudradar-monitoring/plexus/server"
 	"github.com/cloudradar-monitoring/plexus/verify"
@@ -54,7 +54,7 @@ var serve = &cli.Command{
 	Description: "Serves plexus",
 	Action: func(c *cli.Context) error {
 		cfg, errs := config.Get(c.String("config"))
-		handle, err := logger.Init(cfg.LogLevel.AsZeroLogLevel(), cfg.LogFile)
+		handle, err := zerologger.Init(cfg.LogLevel.AsZeroLogLevel(), cfg.LogFile)
 		if err != nil {
 			return err
 		}
@@ -70,7 +70,7 @@ var serve = &cli.Command{
 		}
 		log.Debug().Interface("config", cfg).Msg("Using")
 
-		mc, err := control.Connect(&cfg)
+		mc, err := control.Connect(&cfg, zerologger.Get())
 		if err != nil {
 			return fmt.Errorf("could not connect to meshcentral: %s", err)
 		}
@@ -85,7 +85,7 @@ var serve = &cli.Command{
 		}
 		mc.Close()
 
-		h := handler.New(&cfg)
+		h := handler.New(&cfg, zerologger.Get())
 
 		r := mux.NewRouter()
 		r.Use(accessLog)

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-
-	"github.com/rs/zerolog/log"
 )
 
 type Mesh struct {
@@ -32,7 +30,7 @@ func (m *MeshCentral) DeleteMeshes() error {
 
 	for _, mesh := range meshes {
 		if strings.HasPrefix(mesh.Name, m.cfg.MeshCentralGroupPrefix+"/") {
-			log.Info().Str("name", mesh.Name).Msg("Remove Mesh")
+			m.log.Infof("Remove Mesh %s", mesh.Name)
 			if err := m.DeleteMesh(mesh.ID); err != nil {
 				return err
 			}

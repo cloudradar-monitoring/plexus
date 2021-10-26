@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/rs/zerolog/log"
+
+	"github.com/cloudradar-monitoring/plexus/logger"
 )
 
 var Upgrader = websocket.Upgrader{
@@ -16,12 +17,12 @@ var Upgrader = websocket.Upgrader{
 	},
 }
 
-func Hold(rw http.ResponseWriter, r *http.Request) {
+func Hold(log logger.Logger, rw http.ResponseWriter, r *http.Request) {
 	agentConn, err := Upgrader.Upgrade(rw, r, nil)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		_, _ = io.WriteString(rw, "upgrade failed "+err.Error())
-		log.Info().Err(err).Msg("Proxy: upgrade failed")
+		log.Infof("Proxy: upgrade failed: %s", err)
 		return
 	}
 	go func() {
@@ -36,19 +37,20 @@ func Hold(rw http.ResponseWriter, r *http.Request) {
 	}()
 }
 
-func Proxy(rw http.ResponseWriter, r *http.Request, target string) (func(), bool) {
+func Proxy(log logger.Logger, rw http.ResponseWriter, r *http.Request, target string) (func(), bool) {
 	agentConn, err := Upgrader.Upgrade(rw, r, nil)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		_, _ = io.WriteString(rw, "upgrade failed "+err.Error())
-		log.Info().Err(err).Msg("Proxy: upgrade failed")
+		log.Infof("Proxy: upgrade failed: %s", err)
 		return nil, false
 	}
 	serverConn, _, err := websocket.DefaultDialer.Dial(target, nil)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadGateway)
 		_, _ = io.WriteString(rw, "could not reach meshcentral server "+err.Error())
-		log.Error().Err(err).Msg("Proxy: meshcentral unavailable")
+
+		log.Errorf("Proxy: meshcentral unavailable: %s", err)
 		return nil, false
 	}
 
