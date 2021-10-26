@@ -28,6 +28,9 @@ import (
 // @Failure 502 {object} api.Error
 // @Router /session [post]
 func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
+	if !h.auth(rw, r) {
+		return
+	}
 	id := r.FormValue("id")
 	ttlStr := r.FormValue("ttl")
 	user := r.FormValue("username")
@@ -35,6 +38,11 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	ttl, err := strconv.ParseInt(ttlStr, 10, 64)
 	if err != nil {
 		api.WriteBadRequestJSON(rw, fmt.Sprintf("invalid ttl %s: %s", id, err))
+		return
+	}
+
+	if !h.sessionCredentials && (user != "" || pass != "") {
+		api.WriteBadRequestJSON(rw, "session credentials are not allowed")
 		return
 	}
 

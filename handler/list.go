@@ -17,6 +17,10 @@ import (
 // @Failure 500 {object} api.Error
 // @Router /session [get]
 func (h *Handler) ListSessions(rw http.ResponseWriter, r *http.Request) {
+	if !h.auth(rw, r) {
+		return
+	}
+
 	h.lock.Lock()
 	defer h.lock.Unlock()
 	sessions := make([]*api.ListSessionsItem, 0, len(h.sessions))

@@ -21,7 +21,7 @@ import (
 // @Failure 502 {object} api.Error
 // @Router /session/{id} [delete]
 func (h *Handler) DeleteSession(rw http.ResponseWriter, r *http.Request) {
-	session, ok := h.basicAuth(rw, r, mux.Vars(r)["id"])
+	session, ok := h.checkSessionAuthentication(rw, r, mux.Vars(r)["id"])
 	if !ok {
 		return
 	}
