@@ -12,13 +12,12 @@ import (
 
 	"github.com/gorilla/websocket"
 
-	"github.com/cloudradar-monitoring/plexus/config"
 	"github.com/cloudradar-monitoring/plexus/logger"
 )
 
 const GetTimeout = 5 * time.Second
 
-func Connect(cfg *config.Config, log logger.Logger) (*MeshCentral, error) {
+func Connect(cfg *Config, log logger.Logger) (*MeshCentral, error) {
 	mc := &MeshCentral{
 		log:            log,
 		pendingActions: make(map[string]Payload),
@@ -36,7 +35,7 @@ type MeshCentral struct {
 	mutex          sync.Mutex
 	pendingActions map[string]Payload
 	waitFor        map[string]chan<- Payload
-	cfg            *config.Config
+	cfg            *Config
 	conn           *websocket.Conn
 	dead           chan error
 }

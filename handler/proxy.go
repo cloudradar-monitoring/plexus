@@ -21,7 +21,7 @@ func (h *Handler) ProxyMeshCentral() http.Handler {
 		} else {
 			req.URL.Scheme = "http"
 		}
-		req.URL.Host = h.cfg.MeshCentralURLParsed.Host
+		req.URL.Host = h.cfg.MeshCentralURL.Host
 		req.Header.Set("User-Agent", "plexus")
 	}
 	return &httputil.ReverseProxy{

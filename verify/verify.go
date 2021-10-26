@@ -31,7 +31,7 @@ func Verify(configFile string) bool {
 	fmt.Println("Ok!")
 
 	fmt.Print("MeshCentral Server: ")
-	mc, err := control.Connect(&cfg, zerologger.Get())
+	mc, err := control.Connect(cfg.AsControlConfig(), zerologger.Get())
 	if err != nil {
 		fmt.Println("Error")
 		fmt.Println(">", err)
