@@ -58,7 +58,7 @@
         messageContainer.style.display = "none";
       };
 
-      const getShareUrl = "/session/{{.ID}}/url";
+      const getShareUrl = "{{.GetURL}}";
 
       const periodicUrlCheck = () => {
         const handle = setInterval(() => {

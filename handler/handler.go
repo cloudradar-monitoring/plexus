@@ -2,8 +2,11 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
@@ -16,17 +19,33 @@ type Options struct {
 	Config                  *control.Config
 	Log                     logger.Logger
 	Auth                    AuthChecker
+	Prefix                  string
 	AllowSessionCredentials bool
 }
 
-func New(opt *Options) *Handler {
-	return &Handler{
+func Register(r *mux.Router, opt *Options) {
+	opt.Prefix = strings.TrimSuffix(opt.Prefix, "/")
+	if !strings.HasPrefix(opt.Prefix, "/") {
+		opt.Prefix = "/" + opt.Prefix
+	}
+	h := &Handler{
 		log:                opt.Log,
 		auth:               opt.Auth,
 		cfg:                opt.Config,
+		prefix:             opt.Prefix,
 		sessionCredentials: opt.AllowSessionCredentials,
 		sessions:           make(map[string]*Session),
 	}
+	plexus := r.PathPrefix(opt.Prefix).Subrouter()
+	plexus.HandleFunc("/session", h.CreateSession).Methods(http.MethodPost)
+	plexus.HandleFunc("/session", h.ListSessions).Methods(http.MethodGet)
+	plexus.HandleFunc("/session/{id}", h.ShareSession).Methods(http.MethodGet)
+	plexus.HandleFunc("/session/{id}/url", h.ShareSessionURL).Methods(http.MethodGet)
+	plexus.HandleFunc("/session/{id}", h.DeleteSession).Methods(http.MethodDelete)
+	plexus.HandleFunc("/config/{id}:{token}", h.GetAgentMsh).Methods(http.MethodGet)
+	plexus.HandleFunc("/agent/{id}:{token}", h.ProxyAgent).Methods(http.MethodGet)
+	plexus.HandleFunc("/meshrelay.ashx", h.ProxyRelay).Methods(http.MethodGet)
+	r.PathPrefix(h.ProxyMeshCentralURL()).Handler(h.ProxyMeshCentral())
 }
 
 type Handler struct {
@@ -36,6 +55,7 @@ type Handler struct {
 	lock               sync.RWMutex
 	sessionCredentials bool
 	sessions           map[string]*Session
+	prefix             string
 }
 type Session struct {
 	ID                 string

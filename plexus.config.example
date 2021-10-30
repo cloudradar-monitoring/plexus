@@ -25,3 +25,6 @@ PLEXUS_LOG_FILE=
 # Plexus auth for creating sessions
 PLEXUS_AUTH_USER=
 PLEXUS_AUTH_PASS=
+
+# Serve Plexus on a sub path
+PLEXUS_PATH_PREFIX=/

@@ -16,7 +16,6 @@ import (
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/handler"
 	"github.com/cloudradar-monitoring/plexus/logger/zerologger"
-	"github.com/cloudradar-monitoring/plexus/router"
 	"github.com/cloudradar-monitoring/plexus/server"
 	"github.com/cloudradar-monitoring/plexus/verify"
 )
@@ -97,15 +96,16 @@ var serve = &cli.Command{
 			return true
 		}
 
-		h := handler.New(&handler.Options{
+		opt := &handler.Options{
 			Config:                  cfg.AsControlConfig(),
 			Auth:                    auth,
 			Log:                     zerologger.Get(),
-			AllowSessionCredentials: true})
+			Prefix:                  cfg.PathPrefix,
+			AllowSessionCredentials: true}
 
 		r := mux.NewRouter()
 		r.Use(accessLog)
-		router.Register(r, h)
+		handler.Register(r, opt)
 
 		log.Info().Str("addr", cfg.ServerAddress).Msg("Start listening")
 		return server.Start(r, cfg.ServerAddress, cfg.TLSCertFile, cfg.TLSKeyFile)
