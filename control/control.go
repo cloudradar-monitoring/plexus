@@ -81,7 +81,7 @@ func (m *MeshCentral) connect() error {
 
 			action := payload.Action()
 
-			m.log.Debugf("Control Read: %#v", &payload)
+			m.log.Debugf("Control Read: %s", payload.raw())
 
 			func() {
 				m.mutex.Lock()
