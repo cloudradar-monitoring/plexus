@@ -34,6 +34,8 @@ type Config struct {
 	MeshCentralPass        string `split_words:"true" required:"true"`
 	MeshCentralDomain      string `split_words:"true" default:"control"`
 
+	PathPrefix string `split_words:"true" default:"/"`
+
 	ExternalHost string `split_words:"true"`
 
 	AuthUser string `split_words:"true"`

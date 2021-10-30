@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path"
 
 	"github.com/gorilla/mux"
 
@@ -35,7 +36,8 @@ func (h *Handler) ShareSession(rw http.ResponseWriter, r *http.Request) {
 	rw.Header().Add("content-type", "text/html")
 	rw.WriteHeader(http.StatusOK)
 	_ = asset.ShareTemplate.Execute(rw, map[string]string{
-		"ID": session.ID,
+		"ID":     session.ID,
+		"GetURL": path.Join(h.prefix, "session", session.ID, "url"),
 	})
 }
 

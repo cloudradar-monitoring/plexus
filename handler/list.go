@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"path"
 
 	"github.com/cloudradar-monitoring/plexus/api"
 )
@@ -27,8 +28,8 @@ func (h *Handler) ListSessions(rw http.ResponseWriter, r *http.Request) {
 	for _, s := range h.sessions {
 		sessions = append(sessions, &api.ListSessionsItem{
 			ID:              s.ID,
-			SessionURL:      fmt.Sprintf("https://%s/session/%s", r.Host, s.ID),
-			AgentMSH:        fmt.Sprintf("https://%s/config/%s:%s", r.Host, s.ID, s.Token),
+			SessionURL:      fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "session", s.ID)),
+			AgentMSH:        fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "config", fmt.Sprintf("%s:%s", s.ID, s.Token))),
 			SessionUsername: s.Username,
 			SessionPassword: s.Password,
 			ExpiresAt:       s.ExpiresAt,

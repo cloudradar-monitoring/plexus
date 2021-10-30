@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"path"
 	"strconv"
 	"time"
 
@@ -83,7 +84,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			MeshIDHex:  mesh.IDHex,
 			MeshID:     mesh.ID,
 			ServerID:   serverInfo.AgentHash,
-			MeshServer: fmt.Sprintf("wss://%s/agent/%s:%s", r.Host, id, sessionToken),
+			MeshServer: fmt.Sprintf("wss://%s%s", r.Host, path.Join(h.prefix, "agent", fmt.Sprintf("%s:%s", id, sessionToken))),
 			MeshType:   2,
 		},
 	}
@@ -106,8 +107,8 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(rw).Encode(&api.Session{
 		ID:          id,
-		AgentMSH:    fmt.Sprintf("https://%s/config/%s:%s", r.Host, id, session.Token),
-		SessionURL:  fmt.Sprintf("https://%s/session/%s", r.Host, id),
+		AgentMSH:    fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "config", fmt.Sprintf("%s:%s", id, sessionToken))),
+		SessionURL:  fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "session", id)),
 		AgentConfig: session.AgentConfig,
 		ExpiresAt:   session.ExpiresAt,
 	})
