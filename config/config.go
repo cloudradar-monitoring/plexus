@@ -11,6 +11,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/cloudradar-monitoring/plexus/control"
+	"github.com/cloudradar-monitoring/plexus/pairing"
 )
 
 var (
@@ -40,6 +41,11 @@ type Config struct {
 
 	AuthUser string `split_words:"true"`
 	AuthPass string `split_words:"true"`
+
+	PairingUrl  string `split_words:"true"`
+	PairingTTL  int    `split_words:"true"`
+	CompanyName string `split_words:"true"`
+	CompanyLogo string `split_words:"true"`
 }
 
 func (s *Config) AsControlConfig() *control.Config {
@@ -49,6 +55,15 @@ func (s *Config) AsControlConfig() *control.Config {
 		MeshCentralPass:        s.MeshCentralPass,
 		MeshCentralDomain:      s.MeshCentralDomain,
 		MeshCentralGroupPrefix: s.MeshCentralGroupPrefix,
+	}
+}
+
+func (s *Config) AsPairingConfig() *pairing.Config {
+	return &pairing.Config{
+		PairingUrl:  s.PairingUrl,
+		PairingTTL:  s.PairingTTL,
+		CompanyName: s.CompanyName,
+		CompanyLogo: s.CompanyLogo,
 	}
 }
 

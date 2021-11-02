@@ -97,7 +97,8 @@ var serve = &cli.Command{
 		}
 
 		opt := &handler.Options{
-			Config:                  cfg.AsControlConfig(),
+			ControlConfig:           cfg.AsControlConfig(),
+			PairingConfig:           cfg.AsPairingConfig(),
 			Auth:                    auth,
 			Log:                     zerologger.Get(),
 			Prefix:                  cfg.PathPrefix,

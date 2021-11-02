@@ -11,12 +11,14 @@ import (
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/logger"
+	"github.com/cloudradar-monitoring/plexus/pairing"
 )
 
 type AuthChecker func(rw http.ResponseWriter, r *http.Request) bool
 
 type Options struct {
-	Config                  *control.Config
+	ControlConfig           *control.Config
+	PairingConfig           *pairing.Config
 	Log                     logger.Logger
 	Auth                    AuthChecker
 	Prefix                  string
@@ -31,7 +33,8 @@ func Register(r *mux.Router, opt *Options) {
 	h := &Handler{
 		log:                opt.Log,
 		auth:               opt.Auth,
-		cfg:                opt.Config,
+		ccfg:               opt.ControlConfig,
+		pcfg:               opt.PairingConfig,
 		prefix:             opt.Prefix,
 		sessionCredentials: opt.AllowSessionCredentials,
 		sessions:           make(map[string]*Session),
@@ -45,16 +48,20 @@ func Register(r *mux.Router, opt *Options) {
 	plexus.HandleFunc("/config/{id}:{token}", h.GetAgentMsh).Methods(http.MethodGet)
 	plexus.HandleFunc("/agent/{id}:{token}", h.ProxyAgent).Methods(http.MethodGet)
 	plexus.HandleFunc("/meshrelay.ashx", h.ProxyRelay).Methods(http.MethodGet)
+	plexus.HandleFunc("/pairing/{code}", h.Pair).Methods(http.MethodGet)
 	r.PathPrefix(h.ProxyMeshCentralURL()).Handler(h.ProxyMeshCentral())
 }
 
 type Handler struct {
 	log                logger.Logger
-	cfg                *control.Config
+	ccfg               *control.Config
+	pcfg               *pairing.Config
 	auth               AuthChecker
 	lock               sync.RWMutex
+	codeLock           sync.RWMutex
 	sessionCredentials bool
 	sessions           map[string]*Session
+	codes              map[string]string
 	prefix             string
 }
 type Session struct {
@@ -64,5 +71,9 @@ type Session struct {
 	Token              string
 	AgentConfig        api.AgentConfig
 	ShareURL           string
+	SupporterName      string
+	SupporterAvatar    string
+	PairingCode        string
+	PairingUrl         string
 	ProxyClose         func()
 }
