@@ -78,7 +78,7 @@ func (h *Handler) ShareSessionURL(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) tryGetURL(rw http.ResponseWriter, session *Session) (string, bool) {
-	mc, err := control.Connect(h.cfg, h.log)
+	mc, err := control.Connect(h.ccfg, h.log)
 	if err != nil {
 		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not connect: %s", err))
 		return "", true

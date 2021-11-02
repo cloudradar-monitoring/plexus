@@ -38,7 +38,7 @@ func (h *Handler) deleteInternal(s *Session) error {
 		s.ProxyClose()
 	}
 
-	mc, err := control.Connect(h.cfg, h.log)
+	mc, err := control.Connect(h.ccfg, h.log)
 	if err != nil {
 		return err
 	}

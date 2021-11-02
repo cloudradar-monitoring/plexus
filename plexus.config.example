@@ -28,3 +28,12 @@ PLEXUS_AUTH_PASS=
 
 # Serve Plexus on a sub path
 PLEXUS_PATH_PREFIX=/
+
+# Publish all sessions on a pairing service
+PLEXUS_PAIRING_URL=https://pc-assist.app/pairing/
+# Pairing codes will expire after N seconds.
+PLEXUS_PAIRING_TTL=600
+# The pc-assist app can show your company name before the sessions start
+PLEXUS_COMPANY_NAME="The great PC support"
+# The pc-assist app can load your logo from a public URL
+PLEXUS_COMPANY_LOGO="https://img.icons8.com/external-wanicon-lineal-color-wanicon/64/000000/external-help-friendship-wanicon-lineal-color-wanicon.png"

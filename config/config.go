@@ -40,6 +40,11 @@ type Config struct {
 
 	AuthUser string `split_words:"true"`
 	AuthPass string `split_words:"true"`
+
+	PairingURL  string `split_words:"true"`
+	PairingTTL  int    `split_words:"true"`
+	CompanyName string `split_words:"true"`
+	CompanyLogo string `split_words:"true"`
 }
 
 func (s *Config) AsControlConfig() *control.Config {
@@ -49,6 +54,22 @@ func (s *Config) AsControlConfig() *control.Config {
 		MeshCentralPass:        s.MeshCentralPass,
 		MeshCentralDomain:      s.MeshCentralDomain,
 		MeshCentralGroupPrefix: s.MeshCentralGroupPrefix,
+	}
+}
+
+type PairingConfig struct {
+	PairingURL  string
+	PairingTTL  int
+	CompanyName string
+	CompanyLogo string
+}
+
+func (s *Config) AsPairingConfig() *PairingConfig {
+	return &PairingConfig{
+		PairingURL:  s.PairingURL,
+		PairingTTL:  s.PairingTTL,
+		CompanyName: s.CompanyName,
+		CompanyLogo: s.CompanyLogo,
 	}
 }
 

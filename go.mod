@@ -9,4 +9,5 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/rs/zerolog v1.23.0
 	github.com/urfave/cli/v2 v2.3.0
+	golang.org/x/net v0.0.0-20201021035429-f5854403a974
 )

@@ -1,16 +1,32 @@
 package handler
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"path"
 	"strconv"
 	"time"
 
+	"golang.org/x/net/context/ctxhttp"
+
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/token"
+)
+
+const (
+	defaultTimeout = 5 * time.Second
+	contentType    = "application/json"
+)
+
+var (
+	ErrUnableToPair         = errors.New("unable to pair")
+	ErrMissingSupporterInfo = errors.New("missing supporter info")
 )
 
 // CreateSession godoc
@@ -23,6 +39,8 @@ import (
 // @Param ttl formData int true "the time to live for the session"
 // @Param username formData string true "the credentials to open the remote control interface & delete the session"
 // @Param password formData string true "the credentials to open the remote control interface & delete the session"
+// @Param supporter_name formData string true "the supporter name"
+// @Param supporter_avatar formData string true "the supporter avatar"
 // @Success 200 {object} api.Session
 // @Failure 400 {object} api.Error
 // @Failure 500 {object} api.Error
@@ -36,6 +54,8 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	ttlStr := r.FormValue("ttl")
 	user := r.FormValue("username")
 	pass := r.FormValue("password")
+	supName := r.FormValue("supporter_name")
+	supAvatar := r.FormValue("supporter_avatar")
 	ttl, err := strconv.ParseInt(ttlStr, 10, 64)
 	if err != nil {
 		api.WriteBadRequestJSON(rw, fmt.Sprintf("invalid ttl %s: %s", id, err))
@@ -55,13 +75,13 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mc, err := control.Connect(h.cfg, h.log)
+	mc, err := control.Connect(h.ccfg, h.log)
 	defer mc.Close()
 	if err != nil {
 		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not connect to mesh control: %s", err))
 		return
 	}
-	mesh, err := mc.CreateMesh(h.cfg.MeshCentralGroupPrefix + "/" + id + "/" + token.New(5))
+	mesh, err := mc.CreateMesh(h.ccfg.MeshCentralGroupPrefix + "/" + id + "/" + token.New(5))
 	if err != nil {
 		api.WriteBadGatewayJSON(rw, fmt.Sprintf("could not create mesh: %s", err))
 		return
@@ -88,6 +108,20 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			MeshType:   2,
 		},
 	}
+
+	if h.pcfg.PairingURL != "" {
+		err = h.pcPair(r.Context(), r.Host, supName, supAvatar, session)
+		if err != nil {
+			if errors.Is(err, ErrMissingSupporterInfo) {
+				api.WriteJSONError(rw, http.StatusBadRequest, "You need to provide supporter_name and supporter_avatar for pairing")
+				return
+			}
+
+			api.WriteJSONError(rw, http.StatusBadGateway, fmt.Sprintf("Unable to create session, failed to pair: %s", err.Error()))
+			return
+		}
+	}
+
 	h.sessions[id] = session
 
 	go func() {
@@ -107,9 +141,70 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(rw).Encode(&api.Session{
 		ID:          id,
-		AgentMSH:    fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "config", fmt.Sprintf("%s:%s", id, sessionToken))),
 		SessionURL:  fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "session", id)),
+		AgentMSH:    fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "config", fmt.Sprintf("%s:%s", id, sessionToken))),
+		PairingCode: session.PairingCode,
+		PairingURL:  session.PairingURL,
 		AgentConfig: session.AgentConfig,
 		ExpiresAt:   session.ExpiresAt,
 	})
+}
+
+type Request struct {
+	URL string `json:"url"`
+}
+
+type Response struct {
+	Success     bool   `json:"success"`
+	Code        string `json:"code"`
+	PairingURL  string `json:"pairing_url"`
+	RedirectURL string `json:"redirect_url"`
+}
+
+func (h *Handler) pcPair(ctx context.Context, host, supName, supAvatar string, session *Session) error {
+	h.log.Debugf("pairing to %s ...", h.pcfg.PairingURL)
+
+	if supName == "" || supAvatar == "" {
+		return ErrMissingSupporterInfo
+	}
+
+	jsonRequest, _ := json.Marshal(&Request{
+		URL: fmt.Sprintf("https://%s%s/pairing", host, h.prefix),
+	})
+	client := &http.Client{
+		Timeout: defaultTimeout,
+	}
+
+	response, err := ctxhttp.Post(ctx, client, h.pcfg.PairingURL, contentType, bytes.NewBuffer(jsonRequest))
+	if err != nil {
+		return fmt.Errorf("post failed: %w", err)
+	}
+
+	defer response.Body.Close()
+	jsonResponse, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
+		return fmt.Errorf("reading body failed code(%d) error: %w", response.StatusCode, err)
+	}
+
+	if response.StatusCode != http.StatusOK {
+		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
+		return fmt.Errorf("code(%d) error: %w", response.StatusCode, ErrUnableToPair)
+	}
+
+	resp := Response{}
+	err = json.Unmarshal(jsonResponse, &resp)
+	if err != nil {
+		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
+		return fmt.Errorf("unmarshaling response failed code(%d) error: %w", response.StatusCode, err)
+	}
+
+	session.PairingCode = resp.Code
+	session.PairingURL = resp.PairingURL
+	session.SupporterName = supName
+	session.SupporterAvatar = supAvatar
+
+	h.log.Debugf("pairing succeeded code(%s)", resp.Code)
+
+	return nil
 }

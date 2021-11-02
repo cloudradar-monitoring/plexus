@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/cloudradar-monitoring/plexus/api"
+	"github.com/cloudradar-monitoring/plexus/config"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/logger"
 )
@@ -16,7 +17,8 @@ import (
 type AuthChecker func(rw http.ResponseWriter, r *http.Request) bool
 
 type Options struct {
-	Config                  *control.Config
+	ControlConfig           *control.Config
+	PairingConfig           *config.PairingConfig
 	Log                     logger.Logger
 	Auth                    AuthChecker
 	Prefix                  string
@@ -31,7 +33,8 @@ func Register(r *mux.Router, opt *Options) {
 	h := &Handler{
 		log:                opt.Log,
 		auth:               opt.Auth,
-		cfg:                opt.Config,
+		ccfg:               opt.ControlConfig,
+		pcfg:               opt.PairingConfig,
 		prefix:             opt.Prefix,
 		sessionCredentials: opt.AllowSessionCredentials,
 		sessions:           make(map[string]*Session),
@@ -46,18 +49,21 @@ func Register(r *mux.Router, opt *Options) {
 	plexus.HandleFunc("/config/{id}:{token}", h.GetAgentMsh).Methods(http.MethodGet)
 	plexus.HandleFunc("/agent/{id}:{token}", h.ProxyAgent).Methods(http.MethodGet)
 	plexus.HandleFunc("/meshrelay.ashx", h.ProxyRelay).Methods(http.MethodGet)
+	plexus.HandleFunc("/pairing/{code}", h.Pair).Methods(http.MethodGet)
 	r.PathPrefix(h.ProxyMeshCentralURL()).Handler(h.ProxyMeshCentral())
 }
 
 type Handler struct {
 	log                logger.Logger
-	cfg                *control.Config
+	ccfg               *control.Config
+	pcfg               *config.PairingConfig
 	auth               AuthChecker
 	lock               sync.RWMutex
 	sessionCredentials bool
 	sessions           map[string]*Session
 	prefix             string
 }
+
 type Session struct {
 	ID                 string
 	Username, Password string
@@ -65,5 +71,19 @@ type Session struct {
 	Token              string
 	AgentConfig        api.AgentConfig
 	ShareURL           string
+	SupporterName      string
+	SupporterAvatar    string
+	PairingCode        string
+	PairingURL         string
 	ProxyClose         func()
+}
+
+func (h *Handler) getSessionIDByPairingCode(code string) (*Session, bool) {
+	for _, session := range h.sessions {
+		if session.PairingCode == code {
+			return session, true
+		}
+	}
+
+	return nil, false
 }

@@ -8,6 +8,8 @@ type Session struct {
 	ID          string
 	SessionURL  string
 	AgentMSH    string
+	PairingCode string `json:"PairingCode,omitempty"`
+	PairingURL  string `json:"PairingURL,omitempty"`
 	AgentConfig AgentConfig
 	ExpiresAt   time.Time
 }
@@ -27,5 +29,14 @@ type ListSessionsItem struct {
 	AgentMSH        string
 	SessionUsername string `json:",omitempty"`
 	SessionPassword string `json:",omitempty"`
+	ExpiresAt       time.Time
+}
+
+type PairedSession struct {
+	AgentMSH        string
+	SupporterName   string
+	SupporterAvatar string
+	CompanyName     string
+	CompanyLogo     string
 	ExpiresAt       time.Time
 }
