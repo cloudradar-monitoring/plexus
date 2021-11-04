@@ -8,9 +8,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/rs/zerolog/log"
+	"golang.org/x/net/context/ctxhttp"
 )
 
-const defaultTimeout = 5 * time.Second
+const (
+	defaultTimeout = 5 * time.Second
+	contentType    = "application/json"
+)
 
 var ErrUnableToPair = errors.New("unable to pair")
 
@@ -30,30 +36,24 @@ func Pair(ctx context.Context, url string, req *Request) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	request, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonRequest))
-	if err != nil {
-		return nil, err
-	}
-
-	request.Header.Add("Content-Type", "application/json")
 	client := &http.Client{
 		Timeout: defaultTimeout,
 	}
 
-	response, err := client.Do(request)
+	response, err := ctxhttp.Post(ctx, client, url, contentType, bytes.NewBuffer(jsonRequest))
 	if err != nil {
 		return nil, err
-	}
-
-	if response.StatusCode != http.StatusOK {
-		return nil, ErrUnableToPair
 	}
 
 	defer response.Body.Close()
 	jsonResponse, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
+	}
+
+	if response.StatusCode != http.StatusOK {
+		log.Error().Msg(string(jsonResponse))
+		return nil, ErrUnableToPair
 	}
 
 	resp := Response{}
