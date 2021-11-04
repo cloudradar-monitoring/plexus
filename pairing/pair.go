@@ -2,6 +2,7 @@ package pairing
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -24,13 +25,13 @@ type Response struct {
 	RedirectURL string `json:"redirect_url"`
 }
 
-func Pair(url string, req *Request) (*Response, error) {
+func Pair(ctx context.Context, url string, req *Request) (*Response, error) {
 	jsonRequest, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
 
-	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonRequest))
+	request, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonRequest))
 	if err != nil {
 		return nil, err
 	}
@@ -63,4 +64,3 @@ func Pair(url string, req *Request) (*Response, error) {
 
 	return &resp, nil
 }
-

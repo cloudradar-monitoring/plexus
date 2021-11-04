@@ -101,7 +101,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-		pr, err := pairing.Pair(h.pcfg.PairingURL, &pairing.Request{
+		pr, err := pairing.Pair(r.Context(), h.pcfg.PairingURL, &pairing.Request{
 			Url: "",
 		})
 		if err != nil {
