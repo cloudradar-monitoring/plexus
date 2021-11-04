@@ -74,6 +74,6 @@ type Session struct {
 	SupporterName      string
 	SupporterAvatar    string
 	PairingCode        string
-	PairingUrl         string
+	PairingURL         string
 	ProxyClose         func()
 }

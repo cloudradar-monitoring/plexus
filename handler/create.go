@@ -94,14 +94,14 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	if h.pcfg.PairingUrl != "" {
+	if h.pcfg.PairingURL != "" {
 		if supName == "" || supAvatar == "" {
 			api.WriteJSONResponse(rw, http.StatusBadRequest, map[string]interface{}{
 				"message": "You need to provide supporter_name and supporter_avatar for pairing",
 			})
 			return
 		}
-		pr, err := pairing.Pair(h.pcfg.PairingUrl, &pairing.Request{
+		pr, err := pairing.Pair(h.pcfg.PairingURL, &pairing.Request{
 			Url: "",
 		})
 		if err != nil {
@@ -112,7 +112,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		session.PairingCode = pr.Code
-		session.PairingUrl = pr.PairingUrl
+		session.PairingURL = pr.PairingURL
 		session.SupporterName = supName
 		session.SupporterAvatar = supAvatar
 
@@ -143,7 +143,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		SessionURL:  fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "session", id)),
 		AgentMSH:    fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "config", fmt.Sprintf("%s:%s", id, sessionToken))),
 		PairingCode: session.PairingCode,
-		PairingUrl:  session.PairingUrl,
+		PairingURL:  session.PairingURL,
 		AgentConfig: session.AgentConfig,
 		ExpiresAt:   session.ExpiresAt,
 	})

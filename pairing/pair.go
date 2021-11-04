@@ -20,8 +20,8 @@ type Request struct {
 type Response struct {
 	Success     bool   `json:"success"`
 	Code        string `json:"code"`
-	PairingUrl  string `json:"pairing_url"`
-	RedirectUrl string `json:"redirect_url"`
+	PairingURL  string `json:"pairing_url"`
+	RedirectURL string `json:"redirect_url"`
 }
 
 func Pair(url string, req *Request) (*Response, error) {

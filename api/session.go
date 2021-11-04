@@ -9,7 +9,7 @@ type Session struct {
 	SessionURL  string
 	AgentMSH    string
 	PairingCode string `json:"PairingCode,omitempty"`
-	PairingURL  string `json:"PairingUrl,omitempty"`
+	PairingURL  string `json:"PairingURL,omitempty"`
 	AgentConfig AgentConfig
 	ExpiresAt   time.Time
 }
