@@ -21,9 +21,9 @@ import (
 // @Failure 404 {object} api.Error
 // @Router /session/{code} [get]
 func (h *Handler) Pair(rw http.ResponseWriter, r *http.Request) {
-	h.codeLock.Lock()
+	h.lock.Lock()
+	defer h.lock.Unlock()
 	id, ok := h.codes[mux.Vars(r)["id"]]
-	h.codeLock.Unlock()
 	if !ok {
 		api.WriteJSONResponse(rw, http.StatusNotFound, map[string]interface{}{
 			"message": "Code not found",
