@@ -32,10 +32,7 @@ type Response struct {
 }
 
 func (h *Handler) pcPair(ctx context.Context, url string, req *Request) (*Response, error) {
-	jsonRequest, err := json.Marshal(req)
-	if err != nil {
-		return nil, fmt.Errorf("marshaling request failed: %w", err)
-	}
+	jsonRequest, _ := json.Marshal(req)
 	client := &http.Client{
 		Timeout: defaultTimeout,
 	}
