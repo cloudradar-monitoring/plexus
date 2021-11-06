@@ -10,7 +10,6 @@ import (
 
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
-	"github.com/cloudradar-monitoring/plexus/pcpairing"
 	"github.com/cloudradar-monitoring/plexus/token"
 )
 
@@ -101,7 +100,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			api.WriteJSONError(rw, http.StatusBadRequest, "You need to provide supporter_name and supporter_avatar for pairing")
 			return
 		}
-		pr, err := pcpairing.Pair(r.Context(), h.pcfg.PairingURL, &pcpairing.Request{
+		pr, err := h.pcPair(r.Context(), h.pcfg.PairingURL, &Request{
 			Url: h.pcfg.PairingURL,
 		})
 		if err != nil {
