@@ -11,6 +11,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/cloudradar-monitoring/plexus/control"
+	"github.com/cloudradar-monitoring/plexus/pcpairing"
 )
 
 var (
@@ -47,14 +48,6 @@ type Config struct {
 	CompanyLogo string `split_words:"true"`
 }
 
-type PairingConfig struct {
-	PairingURL  string
-	PairingTTL  int
-	CompanyName string
-	CompanyLogo string
-}
-
-
 func (s *Config) AsControlConfig() *control.Config {
 	return &control.Config{
 		MeshCentralURL:         s.MeshCentralURLParsed,
@@ -65,8 +58,8 @@ func (s *Config) AsControlConfig() *control.Config {
 	}
 }
 
-func (s *Config) AsPairingConfig() *PairingConfig {
-	return &PairingConfig{
+func (s *Config) AsPairingConfig() *pcpairing.Config {
+	return &pcpairing.Config{
 		PairingURL:  s.PairingURL,
 		PairingTTL:  s.PairingTTL,
 		CompanyName: s.CompanyName,
