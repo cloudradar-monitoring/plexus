@@ -62,5 +62,7 @@ func Pair(ctx context.Context, url string, req *Request) (*Response, error) {
 		return nil, err
 	}
 
+
+
 	return &resp, nil
 }

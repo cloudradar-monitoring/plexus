@@ -95,6 +95,8 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.pcfg.PairingURL != "" {
+		h.log.Infof("pairing...")
+
 		if supName == "" || supAvatar == "" {
 			api.WriteJSONResponse(rw, http.StatusBadRequest, map[string]interface{}{
 				"message": "You need to provide supporter_name and supporter_avatar for pairing",
@@ -111,14 +113,14 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		h.log.Infof("pairing succeeded")
+
 		session.PairingCode = pr.Code
 		session.PairingURL = pr.PairingURL
 		session.SupporterName = supName
 		session.SupporterAvatar = supAvatar
 
-		h.codeLock.Lock()
 		h.codes[pr.Code] = id
-		h.codeLock.Unlock()
 	}
 
 	h.sessions[id] = session

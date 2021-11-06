@@ -58,7 +58,6 @@ type Handler struct {
 	pcfg               *pairing.Config
 	auth               AuthChecker
 	lock               sync.RWMutex
-	codeLock           sync.RWMutex
 	sessionCredentials bool
 	sessions           map[string]*Session
 	codes              map[string]string
