@@ -1,4 +1,4 @@
-package pairing
+package pcpairing
 
 type Config struct {
 	PairingURL  string

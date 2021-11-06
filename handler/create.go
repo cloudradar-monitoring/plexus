@@ -10,7 +10,7 @@ import (
 
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
-	"github.com/cloudradar-monitoring/plexus/pairing"
+	"github.com/cloudradar-monitoring/plexus/pcpairing"
 	"github.com/cloudradar-monitoring/plexus/token"
 )
 
@@ -98,18 +98,14 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		h.log.Infof("pairing...")
 
 		if supName == "" || supAvatar == "" {
-			api.WriteJSONResponse(rw, http.StatusBadRequest, map[string]interface{}{
-				"message": "You need to provide supporter_name and supporter_avatar for pairing",
-			})
+			api.WriteJSONError(rw, http.StatusBadRequest, "You need to provide supporter_name and supporter_avatar for pairing")
 			return
 		}
-		pr, err := pairing.Pair(r.Context(), h.pcfg.PairingURL, &pairing.Request{
-			Url: "",
+		pr, err := pcpairing.Pair(r.Context(), h.pcfg.PairingURL, &pcpairing.Request{
+			Url: h.pcfg.PairingURL,
 		})
 		if err != nil {
-			api.WriteJSONResponse(rw, http.StatusInternalServerError, map[string]interface{}{
-				"message": "Unable to create session, failed to pair",
-			})
+			api.WriteJSONError(rw, http.StatusBadGateway, "Unable to create session, failed to pair")
 			return
 		}
 

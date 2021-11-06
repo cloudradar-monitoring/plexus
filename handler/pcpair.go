@@ -1,4 +1,4 @@
-package pairing
+package handler
 
 import (
 	"bytes"
@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/rs/zerolog/log"
 	"golang.org/x/net/context/ctxhttp"
 )
 
@@ -31,7 +30,7 @@ type Response struct {
 	RedirectURL string `json:"redirect_url"`
 }
 
-func Pair(ctx context.Context, url string, req *Request) (*Response, error) {
+func (h *Handler) pcPair(ctx context.Context, url string, req *Request) (*Response, error) {
 	jsonRequest, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -52,7 +51,7 @@ func Pair(ctx context.Context, url string, req *Request) (*Response, error) {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		log.Error().Msg(string(jsonResponse))
+		h.log.Errorf("failed to par with status code %d and response %s", response.StatusCode, string(jsonResponse))
 		return nil, ErrUnableToPair
 	}
 
