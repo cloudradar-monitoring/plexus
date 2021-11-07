@@ -60,9 +60,9 @@ type Handler struct {
 	lock               sync.RWMutex
 	sessionCredentials bool
 	sessions           map[string]*Session
-	codes              map[string]string
 	prefix             string
 }
+
 type Session struct {
 	ID                 string
 	Username, Password string
@@ -75,4 +75,14 @@ type Session struct {
 	PairingCode        string
 	PairingURL         string
 	ProxyClose         func()
+}
+
+func (h *Handler) getSessionID(code string) (string, bool) {
+	for id, session := range h.sessions {
+		if session.PairingCode == code {
+			return id, true
+		}
+	}
+
+	return "", false
 }

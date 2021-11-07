@@ -23,7 +23,7 @@ import (
 func (h *Handler) Pair(rw http.ResponseWriter, r *http.Request) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
-	id, ok := h.codes[mux.Vars(r)["id"]]
+	id, ok := h.getSessionID(mux.Vars(r)["id"])
 	if !ok {
 		api.WriteJSONError(rw, http.StatusNotFound, "Code not found")
 		return

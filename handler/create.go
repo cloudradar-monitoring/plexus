@@ -127,8 +127,6 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 		session.PairingURL = pr.PairingURL
 		session.SupporterName = supName
 		session.SupporterAvatar = supAvatar
-
-		h.codes[pr.Code] = id
 	}
 
 	h.sessions[id] = session
