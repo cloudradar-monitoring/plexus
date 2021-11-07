@@ -113,6 +113,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			api.WriteJSONError(rw, http.StatusBadRequest, "You need to provide supporter_name and supporter_avatar for pairing")
 			return
 		}
+
 		pr, err := h.pcPair(r.Context(), h.pcfg.PairingURL, &Request{
 			Url: fmt.Sprintf("https://%s%s/pairing", h.pcfg.ServerAddress, h.prefix),
 		})

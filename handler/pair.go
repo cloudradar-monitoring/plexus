@@ -19,11 +19,11 @@ import (
 // @Success 200 {object} api.URLResponse
 // @Failure 401 {object} api.Error
 // @Failure 404 {object} api.Error
-// @Router /pair/{code} [get]
+// @Router /pairing/{code} [get]
 func (h *Handler) Pair(rw http.ResponseWriter, r *http.Request) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
-	id, ok := h.getSessionID(mux.Vars(r)["id"])
+	id, ok := h.getSessionID(mux.Vars(r)["code"])
 	if !ok {
 		api.WriteJSONError(rw, http.StatusNotFound, "Code not found")
 		return
