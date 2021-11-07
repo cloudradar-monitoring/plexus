@@ -107,7 +107,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.pcfg.PairingURL != "" {
-		h.log.Infof("pairing...")
+		h.log.Debugf("pairing to %s ...", h.pcfg.PairingURL)
 
 		if supName == "" || supAvatar == "" {
 			api.WriteJSONError(rw, http.StatusBadRequest, "You need to provide supporter_name and supporter_avatar for pairing")
@@ -121,7 +121,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		h.log.Infof("pairing succeeded")
+		h.log.Debugf("pairing succeeded code(%s)", pr.Code)
 
 		session.PairingCode = pr.Code
 		session.PairingURL = pr.PairingURL
