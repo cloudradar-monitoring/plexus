@@ -11,14 +11,14 @@ import (
 	"github.com/cloudradar-monitoring/plexus/api"
 	"github.com/cloudradar-monitoring/plexus/control"
 	"github.com/cloudradar-monitoring/plexus/logger"
-	"github.com/cloudradar-monitoring/plexus/pcpairing"
+	"github.com/cloudradar-monitoring/plexus/pairing"
 )
 
 type AuthChecker func(rw http.ResponseWriter, r *http.Request) bool
 
 type Options struct {
 	ControlConfig           *control.Config
-	PairingConfig           *pcpairing.Config
+	PairingConfig           *pairing.Config
 	Log                     logger.Logger
 	Auth                    AuthChecker
 	Prefix                  string
@@ -55,7 +55,7 @@ func Register(r *mux.Router, opt *Options) {
 type Handler struct {
 	log                logger.Logger
 	ccfg               *control.Config
-	pcfg               *pcpairing.Config
+	pcfg               *pairing.Config
 	auth               AuthChecker
 	lock               sync.RWMutex
 	sessionCredentials bool

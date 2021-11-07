@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"github.com/cloudradar-monitoring/plexus/control"
-	"github.com/cloudradar-monitoring/plexus/pcpairing"
+	"github.com/cloudradar-monitoring/plexus/pairing"
 )
 
 var (
@@ -58,8 +58,8 @@ func (s *Config) AsControlConfig() *control.Config {
 	}
 }
 
-func (s *Config) AsPairingConfig() *pcpairing.Config {
-	return &pcpairing.Config{
+func (s *Config) AsPairingConfig() *pairing.Config {
+	return &pairing.Config{
 		PairingURL:  s.PairingURL,
 		PairingTTL:  s.PairingTTL,
 		CompanyName: s.CompanyName,
