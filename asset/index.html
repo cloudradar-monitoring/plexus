@@ -135,7 +135,7 @@ iwr -Uri ${agentMSH} -OutFile meshagent.msh
                                         <textarea class="form-control" id="linux-session" rows="4" readonly>
 curl https://raw.githubusercontent.com/Ylianst/MeshCentral/master/agents/meshagent_x86-64 -O meshagent
 chmod +x meshagent.msh
-curl ${agentMSH} -OutFile meshagent.msh
+curl ${agentMSH} > meshagent.msh
 .\\meshagent connect</textarea>
                                     </div>
                                 </div>
@@ -253,7 +253,7 @@ curl ${agentMSH} -OutFile meshagent.msh
                                            <textarea class="form-control" id="created-linux-session" rows="4" readonly>
    curl https://raw.githubusercontent.com/Ylianst/MeshCentral/master/agents/meshagent_x86-64 -O meshagent
    chmod +x meshagent.msh
-   curl ${data.AgentMSH} -OutFile meshagent.msh
+   curl ${data.AgentMSH} > meshagent.msh
    .\\meshagent connect</textarea>
                                        </div>
                                    </div>
