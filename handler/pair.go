@@ -25,9 +25,7 @@ func (h *Handler) Pair(rw http.ResponseWriter, r *http.Request) {
 	defer h.lock.Unlock()
 	id, ok := h.codes[mux.Vars(r)["id"]]
 	if !ok {
-		api.WriteJSONResponse(rw, http.StatusNotFound, map[string]interface{}{
-			"message": "Code not found",
-		})
+		api.WriteJSONError(rw, http.StatusNotFound,"Code not found")
 		return
 	}
 
