@@ -117,7 +117,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 			Url: fmt.Sprintf("https://%s%s/pairing", h.pcfg.ServerAddress, h.prefix),
 		})
 		if err != nil {
-			api.WriteJSONError(rw, http.StatusBadGateway, "Unable to create session, failed to pair")
+			api.WriteJSONError(rw, http.StatusBadGateway, fmt.Sprintf("Unable to create session, failed to pair: %s", err.Error()))
 			return
 		}
 
