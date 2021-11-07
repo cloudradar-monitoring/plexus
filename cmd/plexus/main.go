@@ -102,7 +102,8 @@ var serve = &cli.Command{
 			Auth:                    auth,
 			Log:                     zerologger.Get(),
 			Prefix:                  cfg.PathPrefix,
-			AllowSessionCredentials: true}
+			AllowSessionCredentials: true,
+		}
 
 		r := mux.NewRouter()
 		r.Use(accessLog)

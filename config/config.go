@@ -60,10 +60,11 @@ func (s *Config) AsControlConfig() *control.Config {
 
 func (s *Config) AsPairingConfig() *pairing.Config {
 	return &pairing.Config{
-		PairingURL:  s.PairingURL,
-		PairingTTL:  s.PairingTTL,
-		CompanyName: s.CompanyName,
-		CompanyLogo: s.CompanyLogo,
+		ServerAddress: s.ServerAddress,
+		PairingURL:    s.PairingURL,
+		PairingTTL:    s.PairingTTL,
+		CompanyName:   s.CompanyName,
+		CompanyLogo:   s.CompanyLogo,
 	}
 }
 
