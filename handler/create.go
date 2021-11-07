@@ -184,18 +184,20 @@ func (h *Handler) pcPair(ctx context.Context, url string, req *Request) (*Respon
 	defer response.Body.Close()
 	jsonResponse, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		return nil, fmt.Errorf("reading body failed: %w", err)
+		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
+		return nil, fmt.Errorf("reading body failed code(%d) error: %w", response.StatusCode, err)
 	}
 
 	if response.StatusCode != http.StatusOK {
 		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
-		return nil, ErrUnableToPair
+		return nil, fmt.Errorf("code(%s) error: %w", response.StatusCode, ErrUnableToPair)
 	}
 
 	resp := Response{}
 	err = json.Unmarshal(jsonResponse, &resp)
 	if err != nil {
-		return nil, fmt.Errorf("unmarshaling response failed: %w", err)
+		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
+		return nil, fmt.Errorf("unmarshaling response failed code(%d) error: %w", response.StatusCode, err)
 	}
 
 	return &resp, nil
