@@ -190,7 +190,7 @@ func (h *Handler) pcPair(ctx context.Context, url string, req *Request) (*Respon
 
 	if response.StatusCode != http.StatusOK {
 		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
-		return nil, fmt.Errorf("code(%s) error: %w", response.StatusCode, ErrUnableToPair)
+		return nil, fmt.Errorf("code(%d) error: %w", response.StatusCode, ErrUnableToPair)
 	}
 
 	resp := Response{}
