@@ -117,7 +117,7 @@
                                                     <i class="far fa-copy" onclick="copy('windows-session')"></i>
                                                 </span>
                                                 <textarea class="form-control" id="windows-session" rows="3" readonly>
-wr -Uri https://github.com/Ylianst/MeshCentral/raw/master/agents/MeshService-signed.exe -OutFile meshagent.exe
+iwr -Uri https://github.com/Ylianst/MeshCentral/raw/master/agents/MeshService-signed.exe -OutFile meshagent.exe
 iwr -Uri ${agentMSH} -OutFile meshagent.msh
 .\\meshagent.exe connect</textarea>
                                             </div>
@@ -134,9 +134,9 @@ iwr -Uri ${agentMSH} -OutFile meshagent.msh
                                         </span>
                                         <textarea class="form-control" id="linux-session" rows="4" readonly>
 curl https://raw.githubusercontent.com/Ylianst/MeshCentral/master/agents/meshagent_x86-64 -O meshagent
-chmod +x meshagent.msh
+chmod +x meshagent
 curl ${agentMSH} > meshagent.msh
-.\\meshagent connect</textarea>
+./meshagent connect</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -233,7 +233,7 @@ curl ${agentMSH} > meshagent.msh
                                                        <i class="far fa-copy" onclick="copy('created-windows-session')"></i>
                                                    </span>
                                                    <textarea class="form-control" id="created-windows-session" rows="3" readonly>
-   wr -Uri https://github.com/Ylianst/MeshCentral/raw/master/agents/MeshService-signed.exe -OutFile meshagent.exe
+   iwr -Uri https://github.com/Ylianst/MeshCentral/raw/master/agents/MeshService-signed.exe -OutFile meshagent.exe
    iwr -Uri ${data.AgentMSH} -OutFile meshagent.msh
    .\\meshagent.exe connect</textarea>
                                                </div>
@@ -252,9 +252,9 @@ curl ${agentMSH} > meshagent.msh
                                            </span>
                                            <textarea class="form-control" id="created-linux-session" rows="4" readonly>
    curl https://raw.githubusercontent.com/Ylianst/MeshCentral/master/agents/meshagent_x86-64 -O meshagent
-   chmod +x meshagent.msh
+   chmod +x meshagent
    curl ${data.AgentMSH} > meshagent.msh
-   .\\meshagent connect</textarea>
+   ./meshagent connect</textarea>
                                        </div>
                                    </div>
                                 </div>`
