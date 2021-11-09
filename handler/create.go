@@ -151,7 +151,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 }
 
 type Request struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 }
 
 type Response struct {
@@ -161,7 +161,7 @@ type Response struct {
 	RedirectURL string `json:"redirect_url"`
 }
 
-func (h *Handler) pcPair(ctx context.Context, supName string, supAvatar string, session *Session) error {
+func (h *Handler) pcPair(ctx context.Context, supName, supAvatar string, session *Session) error {
 	h.log.Debugf("pairing to %s ...", h.pcfg.PairingURL)
 
 	if supName == "" || supAvatar == "" {
@@ -169,7 +169,7 @@ func (h *Handler) pcPair(ctx context.Context, supName string, supAvatar string, 
 	}
 
 	jsonRequest, _ := json.Marshal(&Request{
-		Url: fmt.Sprintf("https://%s%s/pairing", h.pcfg.ServerAddress, h.prefix),
+		URL: fmt.Sprintf("https://%s%s/pairing", h.pcfg.ServerAddress, h.prefix),
 	})
 	client := &http.Client{
 		Timeout: defaultTimeout,
