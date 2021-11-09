@@ -24,7 +24,10 @@ const (
 	contentType    = "application/json"
 )
 
-var ErrUnableToPair = errors.New("unable to pair")
+var (
+	ErrUnableToPair         = errors.New("unable to pair")
+	ErrMissingSupporterInfo = errors.New("missing supporter info")
+)
 
 // CreateSession godoc
 // @Summary Create a session.
@@ -107,27 +110,16 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.pcfg.PairingURL != "" {
-		h.log.Debugf("pairing to %s ...", h.pcfg.PairingURL)
-
-		if supName == "" || supAvatar == "" {
-			api.WriteJSONError(rw, http.StatusBadRequest, "You need to provide supporter_name and supporter_avatar for pairing")
-			return
-		}
-
-		pr, err := h.pcPair(r.Context(), h.pcfg.PairingURL, &Request{
-			Url: fmt.Sprintf("https://%s%s/pairing", h.pcfg.ServerAddress, h.prefix),
-		})
+		err = h.pcPair(r.Context(), supName, supAvatar, session)
 		if err != nil {
+			if errors.Is(err, ErrMissingSupporterInfo) {
+				api.WriteJSONError(rw, http.StatusBadRequest, "You need to provide supporter_name and supporter_avatar for pairing")
+				return
+			}
+
 			api.WriteJSONError(rw, http.StatusBadGateway, fmt.Sprintf("Unable to create session, failed to pair: %s", err.Error()))
 			return
 		}
-
-		h.log.Debugf("pairing succeeded code(%s)", pr.Code)
-
-		session.PairingCode = pr.Code
-		session.PairingURL = pr.PairingURL
-		session.SupporterName = supName
-		session.SupporterAvatar = supAvatar
 	}
 
 	h.sessions[id] = session
@@ -169,35 +161,50 @@ type Response struct {
 	RedirectURL string `json:"redirect_url"`
 }
 
-func (h *Handler) pcPair(ctx context.Context, url string, req *Request) (*Response, error) {
-	jsonRequest, _ := json.Marshal(req)
+func (h *Handler) pcPair(ctx context.Context, supName string, supAvatar string, session *Session) error {
+	h.log.Debugf("pairing to %s ...", h.pcfg.PairingURL)
+
+	if supName == "" || supAvatar == "" {
+		return ErrMissingSupporterInfo
+	}
+
+	jsonRequest, _ := json.Marshal(&Request{
+		Url: fmt.Sprintf("https://%s%s/pairing", h.pcfg.ServerAddress, h.prefix),
+	})
 	client := &http.Client{
 		Timeout: defaultTimeout,
 	}
 
-	response, err := ctxhttp.Post(ctx, client, url, contentType, bytes.NewBuffer(jsonRequest))
+	response, err := ctxhttp.Post(ctx, client, h.pcfg.PairingURL, contentType, bytes.NewBuffer(jsonRequest))
 	if err != nil {
-		return nil, fmt.Errorf("post failed: %w", err)
+		return fmt.Errorf("post failed: %w", err)
 	}
 
 	defer response.Body.Close()
 	jsonResponse, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
-		return nil, fmt.Errorf("reading body failed code(%d) error: %w", response.StatusCode, err)
+		return fmt.Errorf("reading body failed code(%d) error: %w", response.StatusCode, err)
 	}
 
 	if response.StatusCode != http.StatusOK {
 		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
-		return nil, fmt.Errorf("code(%d) error: %w", response.StatusCode, ErrUnableToPair)
+		return fmt.Errorf("code(%d) error: %w", response.StatusCode, ErrUnableToPair)
 	}
 
 	resp := Response{}
 	err = json.Unmarshal(jsonResponse, &resp)
 	if err != nil {
 		h.log.Errorf("pairing request failed: status(%d) response(%s)", response.StatusCode, string(jsonResponse))
-		return nil, fmt.Errorf("unmarshaling response failed code(%d) error: %w", response.StatusCode, err)
+		return fmt.Errorf("unmarshaling response failed code(%d) error: %w", response.StatusCode, err)
 	}
 
-	return &resp, nil
+	session.PairingCode = resp.Code
+	session.PairingURL = resp.PairingURL
+	session.SupporterName = supName
+	session.SupporterAvatar = supAvatar
+
+	h.log.Debugf("pairing succeeded code(%s)", resp.Code)
+
+	return nil
 }
