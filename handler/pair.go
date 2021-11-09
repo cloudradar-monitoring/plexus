@@ -34,7 +34,7 @@ func (h *Handler) Pair(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	api.WriteJSONResponse(rw, http.StatusNotFound, api.PairedSession{
+	api.WriteJSONResponse(rw, http.StatusOK, api.PairedSession{
 		AgentMSH:        fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "config", fmt.Sprintf("%s:%s", id, session.Token))),
 		SupporterName:   session.SupporterName,
 		SupporterAvatar: session.SupporterAvatar,
