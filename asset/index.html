@@ -174,6 +174,8 @@ curl ${agentMSH} > meshagent.msh
             formData.append("ttl", document.getElementById('ttl').value)
             formData.append("username", document.getElementById('username').value)
             formData.append("password", document.getElementById('password').value)
+            formData.append("supporter_name", document.getElementById('supporter_name').value)
+            formData.append("supporter_avatar", document.getElementById('supporter_avatar').value)
             fetch(createUrl, {
                 method: 'POST',
                 headers: {
@@ -181,7 +183,7 @@ curl ${agentMSH} > meshagent.msh
                 },
                 body: formData,
             }).then((response) => response.json()).then((data) => {
-                if (data.Error !==undefined) {
+                if (data.Error !== undefined) {
                     alert(data.Description)
                     return
                 }
@@ -359,11 +361,23 @@ curl ${agentMSH} > meshagent.msh
                         <label class="label-on-border">Password protection (reccomended)</label>
                         <div class="form-outline mb-4">
                             <input type="text" id="username" class="form-control"/>
-                            <label class="form-label" for="Username">Username</label>
+                            <label class="form-label" for="username">Username</label>
                         </div>
                         <div class="form-outline">
                             <input type="password" id="password" class="form-control"/>
                             <label class="form-label" for="password">Password</label>
+                        </div>
+                    </div>
+                    <!-- Supporter fields -->
+                    <div class="form-outline mb-4 div-border">
+                        <label class="label-on-border">Supporter information</label>
+                        <div class="form-outline mb-4">
+                            <input type="text" id="supporter_name" class="form-control"/>
+                            <label class="form-label" for="supporter_name">Name</label>
+                        </div>
+                        <div class="form-outline">
+                            <input type="text" id="supporter_avatar" class="form-control"/>
+                            <label class="form-label" for="supporter_avatar">Avatar</label>
                         </div>
                     </div>
                     <button type="button" class="btn btn-primary btn-block" id="create" onclick="createSession()">
