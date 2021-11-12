@@ -24,7 +24,7 @@ func (h *Handler) Pair(rw http.ResponseWriter, r *http.Request) {
 	h.lock.Lock()
 	defer h.lock.Unlock()
 
-	code, ok:= mux.Vars(r)["code"]
+	code, ok := mux.Vars(r)["code"]
 	if !ok {
 		api.WriteJSONError(rw, http.StatusNotFound, "Code is required")
 		return
