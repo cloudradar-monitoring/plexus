@@ -30,20 +30,14 @@ func (h *Handler) Pair(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, ok := h.getSessionID(code)
+	session, ok := h.getSessionIDByPairingCode(code)
 	if !ok {
 		api.WriteJSONError(rw, http.StatusNotFound, "Code not found")
 		return
 	}
 
-	session, ok := h.sessions[id]
-	if !ok {
-		api.WriteJSONError(rw, http.StatusNotFound, fmt.Sprintf("Session paired to code %s doesn't exist", code))
-		return
-	}
-
 	api.WriteJSONResponse(rw, http.StatusOK, api.PairedSession{
-		AgentMSH:        fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "config", fmt.Sprintf("%s:%s", id, session.Token))),
+		AgentMSH:        fmt.Sprintf("https://%s%s", r.Host, path.Join(h.prefix, "config", fmt.Sprintf("%s:%s", session.ID, session.Token))),
 		SupporterName:   session.SupporterName,
 		SupporterAvatar: session.SupporterAvatar,
 		CompanyName:     h.pcfg.CompanyName,

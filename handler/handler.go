@@ -77,12 +77,12 @@ type Session struct {
 	ProxyClose         func()
 }
 
-func (h *Handler) getSessionID(code string) (string, bool) {
-	for id, session := range h.sessions {
+func (h *Handler) getSessionIDByPairingCode(code string) (*Session, bool) {
+	for _, session := range h.sessions {
 		if session.PairingCode == code {
-			return id, true
+			return session, true
 		}
 	}
 
-	return "", false
+	return nil, false
 }
