@@ -110,7 +110,7 @@ func (h *Handler) CreateSession(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	if h.pcfg.PairingURL != "" {
-		err = h.pcPair(r.Context(), supName, supAvatar, session)
+		err = h.pcPair(r.Context(), r.Host, supName, supAvatar, session)
 		if err != nil {
 			if errors.Is(err, ErrMissingSupporterInfo) {
 				api.WriteJSONError(rw, http.StatusBadRequest, "You need to provide supporter_name and supporter_avatar for pairing")
@@ -161,7 +161,7 @@ type Response struct {
 	RedirectURL string `json:"redirect_url"`
 }
 
-func (h *Handler) pcPair(ctx context.Context, supName, supAvatar string, session *Session) error {
+func (h *Handler) pcPair(ctx context.Context, host, supName, supAvatar string, session *Session) error {
 	h.log.Debugf("pairing to %s ...", h.pcfg.PairingURL)
 
 	if supName == "" || supAvatar == "" {
@@ -169,7 +169,7 @@ func (h *Handler) pcPair(ctx context.Context, supName, supAvatar string, session
 	}
 
 	jsonRequest, _ := json.Marshal(&Request{
-		URL: fmt.Sprintf("https://%s%s/pairing", h.pcfg.ServerAddress, h.prefix),
+		URL: fmt.Sprintf("https://%s%s/pairing", host, h.prefix),
 	})
 	client := &http.Client{
 		Timeout: defaultTimeout,
