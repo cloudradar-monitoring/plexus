@@ -58,18 +58,18 @@ func (s *Config) AsControlConfig() *control.Config {
 }
 
 type PairingConfig struct {
-	PairingURL    string
-	PairingTTL    int
-	CompanyName   string
-	CompanyLogo   string
+	PairingURL  string
+	PairingTTL  int
+	CompanyName string
+	CompanyLogo string
 }
 
 func (s *Config) AsPairingConfig() *PairingConfig {
 	return &PairingConfig{
-		PairingURL:    s.PairingURL,
-		PairingTTL:    s.PairingTTL,
-		CompanyName:   s.CompanyName,
-		CompanyLogo:   s.CompanyLogo,
+		PairingURL:  s.PairingURL,
+		PairingTTL:  s.PairingTTL,
+		CompanyName: s.CompanyName,
+		CompanyLogo: s.CompanyLogo,
 	}
 }
 
