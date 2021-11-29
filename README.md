@@ -121,6 +121,7 @@ $ chmod -R g=rx /etc/letsencrypt
 1. Configure MeshCental to use your certificates for TLS:
 
    ```bash
+   . /tmp/install-vars
    ln -s /etc/letsencrypt/live/${FQDN}/fullchain.pem ~/meshcentral/meshcentral-data/webserver-cert-public.crt
    ln -s /etc/letsencrypt/live/${FQDN}/privkey.pem ~/meshcentral/meshcentral-data/webserver-cert-private.key
    ```
