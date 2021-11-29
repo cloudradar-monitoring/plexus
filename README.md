@@ -195,14 +195,15 @@ $ chmod -R g=rx /etc/letsencrypt
 
    ```
    ● meshcentral.service - MeshCentral Server
-        Loaded: loaded (/etc/systemd/system/meshcentral.service; disabled; vendor preset: enabled)
-        Active: active (running) since Tue 2021-09-14 14:21:45 UTC; 29ms ago
-      Main PID: 7329 (node)
-         Tasks: 6 (limit: 2354)
-        Memory: 2.2M
-           CPU: 10ms
-        CGroup: /system.slice/meshcentral.service
-                └─7329 /usr/bin/node /var/lib/meshcentral/node_modules/meshcentral --tlsoffload --exactports
+     Loaded: loaded (/etc/systemd/system/meshcentral.service; enabled; vendor preset: enabled)
+     Active: active (running) since Mon 2021-11-29 10:42:14 UTC; 2s ago
+   Main PID: 2780 (node)
+      Tasks: 22 (limit: 1123)
+     Memory: 111.0M
+        CPU: 2.027s
+     CGroup: /system.slice/meshcentral.service
+             ├─2780 /usr/bin/node /var/lib/plexus/meshcentral/node_modules/meshcentral
+             └─2791 /usr/bin/node /var/lib/plexus/meshcentral/node_modules/meshcentral --launch 2780
    ```
 
 Resources
