@@ -188,7 +188,7 @@ $ chmod -R g=rx /etc/letsencrypt
 
    ```bash
    $ systemctl enable --now meshcentral
-   $ systemctl status meshcentral
+   $ systemctl --no-pager status meshcentral
    ```
 
    You should get a confirmation like
@@ -226,8 +226,9 @@ Resources
 
    ```bash
    $ cd /tmp
-   $ wget https://github.com/cloudradar-monitoring/plexus/releases/download/v0.0.4/plexus_0.0.4_linux_amd64.tar.gz
-   $ tar -xzf plexus_0.0.4_linux_amd64.tar.gz -C /usr/local/bin plexus
+   $ VERSION=0.0.5
+   $ wget https://github.com/cloudradar-monitoring/plexus/releases/download/v${VERSION}/plexus_${VERSION}_linux_amd64.tar.gz
+   $ tar -xzf plexus_${VERSION}_linux_amd64.tar.gz -C /usr/local/bin plexus
    ```
 
 1. Create a Plexus configuration file.
@@ -235,7 +236,7 @@ Resources
    ```bash
    $ . /tmp/install-vars
    $ mkdir /etc/plexus
-   $ cat << EOF > /etc/plexus/plexus.conf
+   $ cat<<EOF>/etc/plexus/plexus.conf
    # The TLS cert file
    PLEXUS_TLS_CERT_FILE=/etc/letsencrypt/live/${FQDN}/fullchain.pem
    # The TLS key file
@@ -299,7 +300,7 @@ Resources
 1. Check that Plexus is running:
 
    ```bash
-   $ systemctl status plexus
+   $ systemctl --no-pager status plexus
    ```
 
    It should output the following:
